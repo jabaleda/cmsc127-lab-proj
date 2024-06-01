@@ -2,6 +2,7 @@
 # * Import statements
 import os
 import mysql.connector as database
+# TODO: group functions by purpose (in separate files) then import them here
 
 # ? What's in this? contains the main execution of the program
 
