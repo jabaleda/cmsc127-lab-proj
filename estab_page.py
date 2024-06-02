@@ -1,11 +1,9 @@
 # 3. Food Establishment Page Group
 
 # * Import statements
-import mysql.connector as database
-import main
-
-connection = main.connection
-cursor = main.cursor
+# Changed import statement from main to only access the cursor
+# from main import cursor
+import mdb_connector as mdbc
 
 
 # * functions ----------
@@ -18,12 +16,12 @@ def getAllFoodItems(estabId):
         # ? Changed to access user table from locally created projectdb
         statement = "SELECT itemId, name, price, desription FROM fooditem WHERE estabId=%s"
         data = (estabId,)
-        cursor.execute(statement, data)
-        for(itemId, name, price, description) in cursor:
+        mdbc.cursor.execute(statement, data)
+        for(itemId, name, price, description) in mdbc.cursor:
             item = tuple((itemId, name, price, description))
             items.append(item)
 
-    except database.Error as e:
+    except mdbc.database.Error as e:
         print(f"Error retrieving entry from database: {e}")
 
     return items
@@ -35,11 +33,11 @@ def getAllFoodReviews(itemId):
     try:
         statement = "SELECT rating, comment, date_reviewed, username FROM review WHERE itemId=%s"
         data = (itemId,)
-        cursor.execute(statement, data)
-        for(rating, comment, data_reviewed, username) in cursor:
+        mdbc.cursor.execute(statement, data)
+        for(rating, comment, data_reviewed, username) in mdbc.cursor:
             review = tuple((rating, comment, data_reviewed, username))
             reviews.append(review)
-    except database.Error as e:
+    except mdbc.database.Error as e:
         print(f"Error retrieving entry from database: {e}")
     
     return reviews
@@ -50,11 +48,11 @@ def getAllEstabReviews(estabId):
     try:
         statement = "SELECT rating, comment, date_reviewed, username FROM review WHERE estabId=%s"
         data = (estabId,)
-        cursor.execute(statement, data)
-        for(rating, comment, data_reviewed, username) in cursor:
+        mdbc.cursor.execute(statement, data)
+        for(rating, comment, data_reviewed, username) in mdbc.cursor:
             review = tuple((rating, comment, data_reviewed, username))
             reviews.append(review)
-    except database.Error as e:
+    except mdbc.database.Error as e:
         print(f"Error retrieving entry from database: {e}")
     
     return reviews
@@ -268,5 +266,8 @@ def foodEstablishmentPage():
         else:
             print("Invalid choice!")
 
+
+
+# foodEstablishmentPage()
         
 

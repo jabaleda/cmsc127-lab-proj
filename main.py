@@ -1,33 +1,49 @@
 
+# ? What's in this? contains the main execution of the program
 # * Import statements
-import os
-import mysql.connector as database
+from estab_page import *                            # ? Test import for estab_page.py. Simply remove this as its functions are not needed immediately in Section 1
+import mdb_connector as mdbc
 # TODO: group functions by purpose (in separate files) then import them here
 
-# ? What's in this? contains the main execution of the program
 
-# connect to database
-connection = database.connect(
-    user="root",                                        # Uses root user
-    password="poi",                                     # ! Change this to your password
-    host="127.0.0.1",
-    database="projectdb"                                # ! Change this to the name of project database you use
-)
-
-# instantiate cursor
-cursor = connection.cursor()
 
 # functions --------
-def mainOuterMenu():
-    print("\n")
-    print("Choose an action")
-    print("[1] Login")
-    print("[2] Sign Up")
-    print("[0] Exit")
+# ? DB Functions
+def get_data(username):
+    try:
+        # ? Changed to access user table from locally created projectdb
+        statement = "SELECT username, password FROM user WHERE username=%s"
+        data = (username,)
+        mdbc.cursor.execute(statement, data)
+        for(username, password) in mdbc.cursor:
+            # print(f"Successfully retrieved {ename}, {job}")
+            print("Successfully retrieved!")
+            # return found info
+            return username, password
+        # return not found
+        return 0 
+    except database.Error as e:
+        print(f"Error retrieving entry from database: {e}")
 
-    choice = int(input("I want to... "))
 
-    return choice
+def addToUserTable(signup_tuple):
+    
+    username = signup_tuple[0]
+    name = signup_tuple[1]
+    email = signup_tuple[2]
+    password = signup_tuple[3]
+
+    try:
+        statement = "INSERT INTO user (username, name, email, password) VALUES (%s, %s, %s, %s)"
+        data = (username, name, email, password)
+        mdbc.cursor.execute(statement, data)
+        mdbc.connection.commit()
+        print("Successfully signed you up!")
+        return 1
+    except database.Error as e:
+        print(f"Error signing up: {e}")
+        return 0
+
 
 # --- Login functions ---
 def login():
@@ -38,23 +54,6 @@ def login():
     password = input("Enter password: ")
 
     return username, password
-
-
-def get_data(username):
-    try:
-        # ? Changed to access user table from locally created projectdb
-        statement = "SELECT username, password FROM user WHERE username=%s"
-        data = (username,)
-        cursor.execute(statement, data)
-        for(username, password) in cursor:
-            # print(f"Successfully retrieved {ename}, {job}")
-            print("Successfully retrieved!")
-            # return found info
-            return username, password
-        # return not found
-        return 0 
-    except database.Error as e:
-        print(f"Error retrieving entry from database: {e}")
 
 
 def verifyLogin(username, password):
@@ -84,27 +83,24 @@ def signup():
     return username, name, email, password
 
 
-def addToUserTable(signup_tuple):
-    
-    username = signup_tuple[0]
-    name = signup_tuple[1]
-    email = signup_tuple[2]
-    password = signup_tuple[3]
+# Others
+def mainOuterMenu():
+    print("\n")
+    print("Choose an action")
+    print("[1] Login")
+    print("[2] Sign Up")
+    print("[0] Exit")
 
-    try:
-        statement = "INSERT INTO user (username, name, email, password) VALUES (%s, %s, %s, %s)"
-        data = (username, name, email, password)
-        cursor.execute(statement, data)
-        connection.commit()
-        print("Successfully signed you up!")
-        return 1
-    except database.Error as e:
-        print(f"Error signing up: {e}")
-        return 0
+    choice = int(input("I want to... "))
+
+    return choice
+
+
 
 
 
 # * Main Loop
+# * 1. Login / Sign up
 while True:
     userchoice = mainOuterMenu()
 
@@ -116,6 +112,7 @@ while True:
 
         if(loginsuccessFlag == 1):
             print("Login success!")
+            foodEstablishmentPage()
             # proceed to next view
         else:
             print("Error! Invalid username or password")
@@ -134,9 +131,11 @@ while True:
             print("An error ocurred. Please try again")
 
         
+
+        
     elif userchoice == 0:
         print("Goodbye!")
-        connection.close()
+        mdbc.connection.close()
         break
 
 
