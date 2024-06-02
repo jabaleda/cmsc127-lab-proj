@@ -1,18 +1,24 @@
 import mdb_connector as mdbc
-from estab_page import *
 
 # * 4. Specific Food Item functions ----------
+MONTHS = {
+    "January": "01", "February": "02", "March": "03", "April": "04",
+    "May": "05", "June": "06", "July": "07", "August": "08",
+    "September": "09", "October": "10", "November": "11", "December": "12"
+}
+
 def allFoodReviews(itemId):
     foodReviews = getAllFoodReviews(itemId)
 
     if len(foodReviews) > 0:
         for x in foodReviews:
             print("-------------------")
-            print(f"Sender:     {x[3]}")
-            print(f"Rating:     {x[0]}")
-            print(f"{x[1]}")
+            print(f"Username:     {x[3]}")
+            print(f"Rating:     {x[0]}/5.0")
+            print(f"Comment:    {x[1]}")
             print(f"Published:  {x[2]}")
 
+        print("")
         print("[0] Back")
 
         while True:
@@ -42,13 +48,30 @@ def getAllFoodReviews(itemId):
     
     return reviews
 
-def focusedFoodItemPage(itemId):
-    # Assuming itemTuple contains itemId, name, price, description
-    # name is already retrieved from the item selection function
-    name = "Food Item Name Placeholder"  # Replace this with actual name retrieval if needed
+def getFoodItemName(itemId):
+    try:
+        statement = "SELECT name FROM fooditem WHERE itemId = %s"
+        data = (itemId,)
+        mdbc.cursor.execute(statement, data)
+        result = mdbc.cursor.fetchone()
+        if result:
+            return result[0]
+        else:
+            print("Food item not found!")
+            return None
+    except mdbc.database.Error as e:
+        print(f"Error retrieving food item name from database: {e}")
+        return None
+
+def focusedFoodItemPage(itemId, username):
+    name = getFoodItemName(itemId)
+    if not name:
+        return
 
     while True:
-        print(f"--- FOOD ITEM: {name} ---")
+        print("\n")
+        print("--- FOOD ITEM: ---")
+        print(f"     {name}")
         choice = focusedFoodItemMenu()
 
         if choice == 0:
@@ -58,22 +81,21 @@ def focusedFoodItemPage(itemId):
             print(f"Reviews for {name}")
             allFoodReviews(itemId)
         elif choice == 2:
-            # redirect to display recent food reviews only
-            # Implement if needed
-            pass
+            print("\n")
+            #print(f"Reviews for {name}")
+            recentFoodReviews(itemId)
         elif choice == 3:
-            # redirect to add a review
-            # Implement if needed
-            pass
+            addFoodReview(itemId, username)
         else:
             print("Invalid choice!")
 
 def focusedFoodItemMenu():
-    print("\n")
+    print("")
     print("[1] View all reviews")
-    print("[2] View recent reviews")
+    print("[2] View reviews in a specific month")
     print("[3] Review this food item")
     print("[0] Back")
+    print("")
 
     while True:
         try:
@@ -81,3 +103,72 @@ def focusedFoodItemMenu():
             return page_choice
         except ValueError:
             print("Invalid input! Please enter a number.")
+
+def recentFoodReviews(itemId):
+    month = input("Enter the month (e.g., January, February, etc.) to view reviews: ")
+    month_num = MONTHS.get(month.capitalize())
+    
+    if not month_num:
+        print("Invalid month! Please enter a valid month name.")
+        return
+
+    reviews = list()
+
+    try:
+        statement = "SELECT rating, comment, date_reviewed, username FROM review WHERE itemId=%s AND MONTH(date_reviewed) = %s"
+        data = (itemId, month_num)
+        mdbc.cursor.execute(statement, data)
+        for (rating, comment, date_reviewed, username) in mdbc.cursor:
+            review = (rating, comment, date_reviewed, username)
+            reviews.append(review)
+    except mdbc.database.Error as e:
+        print(f"Error retrieving entry from database: {e}")
+
+    if len(reviews) > 0:
+        for x in reviews:
+            print("-------------------")
+            print(f"Username:     {x[3]}")
+            print(f"Rating:     {x[0]}/5.0")
+            print(f"Comment:    {x[1]}")
+            print(f"Published:  {x[2]}")
+        
+        print("")
+        print("[0] Back")
+
+        while True:
+            try:
+                choice = int(input("Return? "))
+                if choice == 0:
+                    break
+                else:
+                    print("Invalid choice!")
+            except ValueError:
+                print("Invalid input! Please enter a number.")
+    else:
+        print("No reviews found for the specified month!")
+
+def addFoodReview(itemId, username):
+
+    print("\n")
+    try:
+        rating = float(input("Enter rating (0.0 to 5.0): "))
+        if rating < 0.0 or rating > 5.0:
+            print("Invalid rating! Must be between 0.0 and 5.0.")
+            return
+
+        comment = input("Enter your comment (max 100 characters): ")
+        if len(comment) > 100:
+            print("Comment too long! Max 100 characters.")
+            return
+
+        statement = "INSERT INTO review (rating, comment, date_reviewed, username, itemId) VALUES (%s, %s, NOW(), %s, %s)"
+        data = (rating, comment, username, itemId)
+        mdbc.cursor.execute(statement, data)
+        mdbc.connection.commit()
+
+        print("Review added successfully!")
+        print("")
+    except mdbc.database.Error as e:
+        print(f"Error adding review to database: {e}")
+    except ValueError:
+        print("Invalid input! Please enter the correct data types.")

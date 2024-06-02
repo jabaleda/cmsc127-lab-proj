@@ -1,11 +1,8 @@
+# main.py
 
-# ? What's in this? contains the main execution of the program
 # * Import statements
-from estab_page import *                            # ? Test import for estab_page.py. Simply remove this as its functions are not needed immediately in Section 1
+from estab_page import foodEstablishmentPage  # Import the necessary function from estab_page
 import mdb_connector as mdbc
-# TODO: group functions by purpose (in separate files) then import them here
-
-
 
 # functions --------
 # ? DB Functions
@@ -22,9 +19,7 @@ def get_data(username):
     except mdbc.database.Error as e:
         print(f"Error retrieving entry from database: {e}")
 
-
 def addToUserTable(signup_tuple):
-    
     username = signup_tuple[0]
     name = signup_tuple[1]
     email = signup_tuple[2]
@@ -41,7 +36,6 @@ def addToUserTable(signup_tuple):
         print(f"Error signing up: {e}")
         return 0
 
-
 # --- Login functions ---
 def login():
     print("\n")
@@ -52,16 +46,15 @@ def login():
 
     return username, password
 
-
 def verifyLogin(username, password):
     # get login details from db
     correctdetails = get_data(username)
-    if (correctdetails == 0):
+    if correctdetails == 0:
         # no user found with that username
         return 0
     else:
         # check if passwords match
-        if(password == correctdetails[1]):
+        if password == correctdetails[1]:
             return 1
         else:
             return 0
@@ -79,7 +72,6 @@ def signup():
 
     return username, name, email, password
 
-
 # Others
 def mainOuterMenu():
     print("\n")
@@ -88,13 +80,12 @@ def mainOuterMenu():
     print("[2] Sign Up")
     print("[0] Exit")
 
-    choice = int(input("I want to... "))
-
-    return choice
-
-
-
-
+    while True:
+        try:
+            choice = int(input("I want to... "))
+            return choice
+        except ValueError:
+            print("Invalid input! Please enter a number.")
 
 # * Main Loop
 # * 1. Login / Sign up
@@ -107,13 +98,14 @@ while True:
         # verify login details from database
         loginsuccessFlag = verifyLogin(data[0], data[1])
 
-        if(loginsuccessFlag == 1):
+        if loginsuccessFlag == 1:
             print("Login success!")
-            foodEstablishmentPage(1)                             # ? Testing purposes of Section 3. Section 2 should be called here instead. Please comment out
+            username = data[0]
+            # Pass the username to foodEstablishmentPage
+            foodEstablishmentPage(1, username)  # Adjust as needed for testing
             # proceed to next view
         else:
             print("Error! Invalid username or password")
-        
         
     elif userchoice == 2:
         # TODO: Add input validation
@@ -122,23 +114,16 @@ while True:
         # add the user credentials to database
         signupsuccessFlag = addToUserTable(signup_details)
 
-        if(signupsuccessFlag == 1):
+        if signupsuccessFlag == 1:
             print("Please log in to continue")
         else:
-            print("An error ocurred. Please try again")
-
-        
-
+            print("An error occurred. Please try again")
         
     elif userchoice == 0:
         print("Goodbye!")
         mdbc.connection.close()
         break
 
-
     else:
         # Catches other int inputs
         print("Invalid choice. Please try again.")
-
-    
-
