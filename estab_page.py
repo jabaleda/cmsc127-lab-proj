@@ -103,6 +103,24 @@ def filterFoodItemsbyType( estabId, typeId ):
     return itemsInType
 
 
+def addToEstabReviewDB(reviewTuple):
+    estabId = reviewTuple[0]
+    username = reviewTuple[1]
+    rating = reviewTuple[2]
+    comment = reviewTuple[3]
+
+    try:
+        # ! Please recheck the SQL Statement ajskhjf
+        statement = "INSERT INTO review (rating, comment, date_reviewed, username, estabId) VALUES (%s, %s, CURDATE(), %s, %s)"
+        data = (rating, comment, username, estabId)
+        mdbc.cursor.execute(statement, data)
+        mdbc.connection.commit()
+        print("Successfully added a review!")
+    except mdbc.database.Error as e:
+        print(f"Error adding review: {e}")
+
+
+
 # * 3a. All Food item Functions ----------
 # should receive estabid to search all food items of establishment
 def allFoodItems( estabId ):
@@ -141,7 +159,6 @@ def allFoodItemsMenu( estabId ):
             # pass the tuple of selected food item
             focusedFoodItemPage(choice)
     return
-
 
 
 # * 3b. Filtered by Food Type Functions ----------
@@ -204,8 +221,6 @@ def filterFoodItemsbyTypePage( estabId ):
             # go to display all food items belonging to that type
 
     
-
-
 # * 3c. Sort Food Items by PriceFunctions ----------
 
 def allFoodItemsbyPrice( estabId, sort ):
@@ -275,7 +290,6 @@ def sortSelectFoodItemsbyPricePage( estabId ):
 
 
 
-
 # * 3d. Establishment reviews Functions ----------
 def allEstabReviews( estabId ):
     estabReviews = getAllEstabReviews(estabId)
@@ -305,12 +319,36 @@ def allEstabReviews( estabId ):
         return
 
 
+# * 3e. View recent establishment reviews ----------
 
 
-# * 3e. Functions ----------
-
-
+# * 3f. Add an Estab. Review Functions ----------
+def addAReview( estabId, username):
+    print("\n")
+    print("Leave a review")
     
+    rating = int(input("Rating (On a scale of 1-5): "))
+    comment = int(input("Leave a comment: "))
+
+    # reviewDetails = tuple((rating, comment))
+
+    while True:
+        print("Publish review?")
+        print("[1] Yes")
+        print("[2] No")
+
+        choice = int(input("Select: "))
+        if choice == 1:
+            reviewDetails = (estabId, username, rating, comment)
+            # save to db
+            addToEstabReviewDB(reviewDetails)
+            return
+        
+        elif choice == 2:
+            print("Review cancelled. Returning...")
+            return 
+        else:
+            print("Invalid choice!")
 
 
 # * 3. Food Establishment functions ----------
@@ -330,8 +368,8 @@ def foodEstabMenu():
     return page_choice
 
 # ? What should this receive?
-# TODO: Provide args - food establishment id and details when calling this from Section 2
-def foodEstablishmentPage( estabId ):
+# TODO: Provide args - username, food establishment id, details when calling this from Section 2
+def foodEstablishmentPage( estabId, username ):
     while True:
         print("<Establishment Name> Details")                           # ? This can be printed on select of an establishment, before calling this function instead so this function only needs the estabId
         choice = foodEstabMenu()
@@ -353,23 +391,23 @@ def foodEstablishmentPage( estabId ):
             sortSelectFoodItemsbyPricePage(estabId)
 
         elif(choice == 3):
-            # TODO: redirect to view of sorted food items
+            # redirect to view of sorted food items
             # Essentially just like choice 1, but modify SQL statement
             sortSelectFoodItemsbyPricePage(estabId)
 
         elif(choice == 4):
-            # TODO: redirect to view of all estab reviews
+            # redirect to view of all estab reviews
             # Pass id to func here
             allEstabReviews(estabId)
             
-
         elif(choice == 5):
             # TODO: redirect to view of recent estab reviews
             # Essentially just like choice 1, but modify SQL statement
             pass
 
         elif(choice == 6):
-            # TODO: redirect to input of adding a review
+            # redirect to input of adding a review
+            addAReview(estabId, username)
             pass
 
 
