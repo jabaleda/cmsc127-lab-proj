@@ -2,15 +2,17 @@
 # * Import statements
 import os
 import mysql.connector as database
+import customerActions
 
 # ? What's in this? contains the main execution of the program
 
-connect to database
+# connect to database
 connection = database.connect(
     user="root",                                        # Uses root user
-    password="poi",                                     # ! Change this to your password
+    password="comsci.127",                                     # ! Change this to your password
     host="127.0.0.1",
-    database="projectdb"                                # ! Change this to the name of project database you use
+    # database="projectdb"
+    database="cmsc127project"                                # ! Change this to the name of project database you use
 )
 
 # instantiate cursor
@@ -47,7 +49,7 @@ def get_data(username):
         cursor.execute(statement, data)
         for(username, password) in cursor:
             # print(f"Successfully retrieved {ename}, {job}")
-            print("Successfully retrieved!")
+            # print("Successfully retrieved!")
             # return found info
             return username, password
         # return not found
@@ -105,45 +107,46 @@ def addToUserTable(signup_tuple):
 
 
 
-* Main Loop
-    while True:
-        userchoice = mainOuterMenu()
+# * Main Loop
+while True:
+    userchoice = mainOuterMenu()
 
-        if userchoice == 1:
-        # print login screen
-            data = login()
-        # verify login details from database
-            loginsuccessFlag = verifyLogin(data[0], data[1])
+    if userchoice == 1:
+    # print login screen
+        data = login()
+    # verify login details from database
+        loginsuccessFlag = verifyLogin(data[0], data[1])
 
-            if(loginsuccessFlag == 1):
-                print("Login success!")
-            # proceed to next view
-            else:
-                print("Error! Invalid username or password")
-        
-        
-        elif userchoice == 2:
-            # TODO: Add input validation
-        # print sign in screen
-            signup_details = signup()
-        # add the user credentials to database
-            signupsuccessFlag = addToUserTable(signup_details)
-
-            if(signupsuccessFlag == 1):
-                print("Please log in to continue")
-            else:
-                print("An error ocurred. Please try again")
-
-        
-        elif userchoice == 0:
-            print("Goodbye!")
-            connection.close()
-            break
-
-
+        if(loginsuccessFlag == 1):
+            print("Login success!")
+            customerActions.userActionsLoop(data[0])
+        # proceed to next view
         else:
-        # Catches other int inputs
-            print("Invalid choice. Please try again.")
+            print("Error! Invalid username or password")
+        
+        
+    elif userchoice == 2:
+    # To do: Add input validation
+    # print sign in screen
+        signup_details = signup()
+    # add the user credentials to database
+        signupsuccessFlag = addToUserTable(signup_details)
+
+        if(signupsuccessFlag == 1):
+            print("Please log in to continue")
+        else:
+            print("An error ocurred. Please try again")
+
+        
+    elif userchoice == 0:
+        print("Goodbye!")
+        # connection.close()
+        break
+
+
+    else:
+    # Catches other int inputs
+        print("Invalid choice. Please try again.")
 
 
 connection.close()
