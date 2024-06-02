@@ -223,77 +223,7 @@ def allEstabReviews( estabId ):
 # * 3e. Functions ----------
 
 
-
-# * 4. Specific Food Item functions ----------
-# TODO/Optional: Put this section in a separate file
-def allFoodReviews( itemId ):
-    foodReviews = getAllFoodReviews(itemId)
-
-    if(len(foodReviews) > 0):
-        for x in foodReviews:
-            print("-------------------")
-            print(f"Sender:     {x[3]}")
-            print(f"Rating:     {x[0]}")
-            print(f"{x[1]}")
-            print(f"Published:  {x[2]}")
-
-        print("[0] Back")
-
-        # ? Implementation Notes: Prompt user if they want to return, on input of invalid value, it does not print all of the reviews again, for readability idk
-        while True:
-            choice = int(input("Return? "))
-            if(choice == 0):
-                break
-            else:
-                print("Invalid choice!")
-        return
-    else:
-        print("No reviews found!")
-
-
-def focusedFoodItemMenu():
-    print("\n")
-    print("[1] View all reviews")
-    print("[2] View recent reviews")
-    print("[3] Review this food item")
-    print("[0] Back")
-
-    page_choice = int(input("Select an action: "))
-
-    return page_choice
-
-
-def focusedFoodItemPage( itemTuple ):
-    itemId = itemTuple[0]
-    name = itemTuple[1]
-    # price = itemTuple[2]
-    # description = itemTuple[3]
-
-    while True:
-        print(f"--- FOOD ITEM: {name} ---")
-        choice = focusedFoodItemMenu()
-
-        if(choice == 0):
-            break
-        elif(choice == 1):
-            print("\n")
-            print(f"Reviews for {name}")
-            # redirect to display all food reviews for this item
-            allFoodReviews(itemId)
-            
-        elif(choice == 2):
-            # TODO: redirect to dislpay recent food reviews only
-            pass
-        elif(choice == 3):
-            # TODO: redirect to add a review
-            pass
-        else:
-            print("Invalid choice!")
-
-
     
-
-
 
 
 # * 3. Food Establishment functions ----------
@@ -361,6 +291,70 @@ def foodEstablishmentPage( estabId ):
 
 
 
-# foodEstablishmentPage()
+# * 4. Specific Food Item functions ----------
+# TODO/Optional: Put this section in a separate file
+def allFoodReviews( itemId ):
+    foodReviews = getAllFoodReviews(itemId)
+
+    if(len(foodReviews) > 0):
+        for x in foodReviews:
+            print("-------------------")
+            print(f"Sender:     {x[3]}")
+            print(f"Rating:     {x[0]}")
+            print(f"{x[1]}")
+            print(f"Published:  {x[2]}")
+
+        print("[0] Back")
+
+        # ? Implementation Notes: Prompt user if they want to return, on input of invalid value, it does not print all of the reviews again, for readability idk
+        while True:
+            choice = int(input("Return? "))
+            if(choice == 0):
+                break
+            else:
+                print("Invalid choice!")
+        return
+    else:
+        print("No reviews found!")
+
+
+def focusedFoodItemMenu():
+    print("\n")
+    print("[1] View all reviews")
+    print("[2] View recent reviews")
+    print("[3] Review this food item")
+    print("[0] Back")
+
+    page_choice = int(input("Select an action: "))
+
+    return page_choice
+
+
+def focusedFoodItemPage( itemTuple ):
+    itemId = itemTuple[0]
+    name = itemTuple[1]
+    # price = itemTuple[2]
+    # description = itemTuple[3]
+
+    while True:
+        print(f"--- FOOD ITEM: {name} ---")
+        choice = focusedFoodItemMenu()
+
+        if(choice == 0):
+            break
+        elif(choice == 1):
+            print("\n")
+            print(f"Reviews for {name}")
+            # redirect to display all food reviews for this item
+            allFoodReviews(itemId)
+            
+        elif(choice == 2):
+            # TODO: redirect to dislpay recent food reviews only
+            pass
+        elif(choice == 3):
+            # TODO: redirect to add a review
+            pass
+        else:
+            print("Invalid choice!")
         
 
