@@ -109,7 +109,7 @@ while True:
 
         if(loginsuccessFlag == 1):
             print("Login success!")
-            # foodEstablishmentPage()                             # ? Testing purposes of Section 3. Section 2 should be called here instead. Please comment out
+            foodEstablishmentPage(1)                             # ? Testing purposes of Section 3. Section 2 should be called here instead. Please comment out
             # proceed to next view
         else:
             print("Error! Invalid username or password")
