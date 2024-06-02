@@ -83,8 +83,48 @@ def verifyLogin(username, password):
         else:
             return 0
 
+def userMenu():
+    print("\n")
+    print("Choose an action")
+    print("[1] Search for a Food Establishment")
+    print("[2] View Food Establishments")
+    print("[3] View filtered food establishments by high average rating")
+    print("[4] Search a food item  (from any establishment) by price range AND/OR food type")
+    print("[0] Exit")
+
+    choice = int(input("I want to... "))
+
+    return choice
+
+def searchFoodEstab():
+    print("\n")
+
+    name = input("Enter the name of the food establishment: ")
+    try:
+        statement = "SELECT * from foodestablishment WHERE name=%s"
+        data = (name,)
+        cursor.execute(statement, data)
+        for(establishmentId, name, average_rating, location) in cursor:
+            print(f"{establishmentId} - {name} - {average_rating} - {location}")
+
+    except database.Error as e:
+        print(f"Error retrieving entry from database: {e}")
+
+def viewAllFoodEstab():
+    try:
+        statement = "SELECT * from foodestablishment;"
+        cursor.execute(statement)
+        for(establishmentId, name, average_rating, location) in cursor:
+            print(f"{establishmentId} - {name} - {average_rating} - {location}")
+    except database.Error as e:
+        print(f"Error retrieving entry from database: {e}")
 
 
+def viewByHighRating():
+    
+    return
+
+def searchFoodItem():
 
 # * Main Loop
 
