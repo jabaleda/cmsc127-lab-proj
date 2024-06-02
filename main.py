@@ -16,9 +16,6 @@ def get_data(username):
         data = (username,)
         mdbc.cursor.execute(statement, data)
         for(username, password) in mdbc.cursor:
-            # print(f"Successfully retrieved {ename}, {job}")
-            # print("Successfully retrieved!")
-            # return found info
             return username, password
         # return not found
         return 0 
@@ -112,8 +109,7 @@ while True:
 
         if(loginsuccessFlag == 1):
             print("Login success!")
-            print("\n")
-            foodEstablishmentPage()                             # ? Testing purposes of Section 3. Section 2 should be called here instead. Please comment out
+            # foodEstablishmentPage()                             # ? Testing purposes of Section 3. Section 2 should be called here instead. Please comment out
             # proceed to next view
         else:
             print("Error! Invalid username or password")
