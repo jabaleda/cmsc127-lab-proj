@@ -111,7 +111,7 @@ def addToEstabReviewDB(reviewTuple):
 
     try:
         # ! Please recheck the SQL Statement ajskhjf
-        statement = "INSERT INTO review (rating, comment, date_reviewed, username, estabId) VALUES (%s, %s, CURDATE(), %s, %s)"
+        statement = "INSERT INTO review (rating, comment, date_reviewed, username, establismentId) VALUES (%s, %s, CURDATE(), %s, %s)"
         data = (rating, comment, username, estabId)
         mdbc.cursor.execute(statement, data)
         mdbc.connection.commit()
