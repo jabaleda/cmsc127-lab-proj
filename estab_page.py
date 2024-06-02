@@ -73,6 +73,34 @@ def sortFoodItemsbyPrice( estabId, sort ):
     return sortedItems
 
 # filter by type
+def getAllFoodTypes():
+    types = list()
+    try:
+        statement = "SELECT foodtypeId, foodType FROM fooditemtype"
+        mdbc.cursor.execute(statement)
+        for(foodtypeId, foodtype) in mdbc.cursor:
+            type = tuple((foodtypeId, foodtype))
+            types.append(type)
+    except mdbc.database.Error as e:
+        print(f"Error retrieving entry from database: {e}")
+    return types
+
+
+def filterFoodItemsbyType( estabId, typeId ):
+    itemsInType = list()
+    try:
+        # ! Please recheck the SQL Statement hajhsdjsk
+        statement = "SELECT DISTINCT itemId, name FROM fooditem NATURAL JOIN fooditemtype WHERE estabId=%s AND foodtypeId=%s"
+        data = (estabId, typeId)
+        mdbc.cursor.execute(statement, data)
+        for(itemId, name) in mdbc.cursor:
+            item = tuple((itemId, name))
+            itemsInType.append(item)
+
+    except mdbc.database.Error as e:
+        print(f"Error retrieving entry from database: {e}")
+
+    return itemsInType
 
 
 # * 3a. All Food item Functions ----------
@@ -95,7 +123,7 @@ def allFoodItems( estabId ):
             selectedIdentifier = 0
             return selectedIdentifier
         else:
-            selectedFoodItem = foodItems[choice-1][0]
+            selectedFoodItem = foodItems[choice-1]      # tuple
             return selectedFoodItem
 
     else:
@@ -116,7 +144,66 @@ def allFoodItemsMenu( estabId ):
 
 
 
-# * 3b. Functions ----------
+# * 3b. Filtered by Food Type Functions ----------
+
+def allFoodItemsbyType(estabId, typeId):
+    filteredItems = filterFoodItemsbyType(estabId, typeId)
+    print("---------- FOOD ITEMS ----------")
+
+    if(len(filteredItems) > 0 ):
+        # print all food items
+        i=1
+        for x in filteredItems:
+            print(f"[{i}] {x[1]}")   # prints food name
+            i+=1
+        print("[0] Back")
+
+        while True:
+            choice = int(input("Select a food item: "))
+            if(choice == 0):
+                break
+            elif(choice < 0 or choice > i):
+                print("Invalid choice!")
+            else:
+                focusedFoodItemPage(filteredItems[choice-1][0])
+
+    else:
+        print("No food items found!")
+        return
+
+
+def foodTypesMenu():
+    types = getAllFoodTypes()
+    print("--- Food Types ---")
+    i=1
+    for x in types:
+        print(f"[{i} {x[1]}]")
+        i+=1
+    print("[0] Back")
+
+    while True:
+        choice = int(input("Select a type: "))
+        if(choice == 0):
+            return choice
+        elif(choice < 0 or choice > i):
+            print("Invalid choice!")
+        else:
+            return types[choice-1][0]       # returns the foodtypeId
+
+
+def filterFoodItemsbyTypePage( estabId ):
+    print("\n")
+    print("--- View food items by Type ---")
+    while True:
+        choice = foodTypesMenu(estabId)
+        if(choice == 0):
+            break
+        else:
+            allFoodItemsbyType(estabId, choice)
+            pass
+            # go to display all food items belonging to that type
+
+    
 
 
 # * 3c. Sort Food Items by PriceFunctions ----------
@@ -136,7 +223,7 @@ def allFoodItemsbyPrice( estabId, sort ):
         if(choice == 0):
             selectedIdentifier = 0
         else:
-            selectedIdentifier = sortedFoodItems[choice-1][0]
+            selectedIdentifier = sortedFoodItems[choice-1]          # tuple
 
         return selectedIdentifier
 
@@ -333,8 +420,6 @@ def focusedFoodItemMenu():
 def focusedFoodItemPage( itemTuple ):
     itemId = itemTuple[0]
     name = itemTuple[1]
-    # price = itemTuple[2]
-    # description = itemTuple[3]
 
     while True:
         print(f"--- FOOD ITEM: {name} ---")
