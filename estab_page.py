@@ -42,6 +42,23 @@ def getAllFoodReviews(itemId):
     
     return reviews
 
+# * NEW ----------
+def getRecentEstabReviews(estabId):
+    recentReviews = list()
+
+    try:
+        # ! Please recheck the SQL Statement hahjshusfhj
+        statement = "SELECT rating, comment, date_reviewed, username FROM review WHERE estabId=%s AND DATEDIFF(CURDATE(), date_reviewed)"
+        data = (estabId,)
+        mdbc.cursor.execute(statement, data)
+        for(rating, comment, data_reviewed, username) in mdbc.cursor:
+            review = tuple((rating, comment, data_reviewed, username))
+            recentReviews.append(review)
+    except mdbc.database.Error as e:
+        print(f"Error retrieving from database: {e}")
+
+    return recentReviews
+        
 
 def getAllEstabReviews(estabId):
     reviews = list()
@@ -84,7 +101,6 @@ def getAllFoodTypes():
     except mdbc.database.Error as e:
         print(f"Error retrieving entry from database: {e}")
     return types
-
 
 def filterFoodItemsbyType( estabId, typeId ):
     itemsInType = list()
@@ -320,6 +336,29 @@ def allEstabReviews( estabId ):
 
 
 # * 3e. View recent establishment reviews ----------
+def recentEstabReviews(estabId):
+    recentReviews = getRecentEstabReviews(estabId)
+    
+    if len(recentEstabReviews) > 0:
+        for x in recentReviews:
+            print("-------------------")
+            print(f"Sender:     {x[3]}")
+            print(f"Rating:     {x[0]}")
+            print(f"{x[1]}")
+            print(f"Published:  {x[2]}")
+
+        print("[0] Back")
+
+        while True:
+            choice = int(input("Return? "))
+            if choice == 0:
+                break
+            else:
+                print("Invalid choice!")
+
+    else:
+        print("No reviews found!")
+        return
 
 
 # * 3f. Add an Estab. Review Functions ----------
