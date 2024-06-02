@@ -44,7 +44,7 @@ def getAllEstabReviews(estabId):
 def sortFoodItemsbyPrice(estabId, sort):
     sortedItems = list()
     try:
-        # Construct the SQL query dynamically to include the sorting order
+        
         statement = "SELECT itemId, name, price, description FROM fooditem WHERE establishmentId=%s ORDER BY price %s"
         if sort.upper() == "ASC":
             statement = statement % (estabId, "ASC")
@@ -54,7 +54,6 @@ def sortFoodItemsbyPrice(estabId, sort):
             print("Invalid sorting order specified.")
             return sortedItems
         
-        # Use the execute() method to pass parameters securely
         mdbc.cursor.execute(statement)
         for (itemId, name, price, description) in mdbc.cursor:
             item = (itemId, name, price, description)
