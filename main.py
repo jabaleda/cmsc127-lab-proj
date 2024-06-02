@@ -17,12 +17,12 @@ def get_data(username):
         mdbc.cursor.execute(statement, data)
         for(username, password) in mdbc.cursor:
             # print(f"Successfully retrieved {ename}, {job}")
-            print("Successfully retrieved!")
+            # print("Successfully retrieved!")
             # return found info
             return username, password
         # return not found
         return 0 
-    except database.Error as e:
+    except mdbc.database.Error as e:
         print(f"Error retrieving entry from database: {e}")
 
 
@@ -40,7 +40,7 @@ def addToUserTable(signup_tuple):
         mdbc.connection.commit()
         print("Successfully signed you up!")
         return 1
-    except database.Error as e:
+    except mdbc.database.Error as e:
         print(f"Error signing up: {e}")
         return 0
 
@@ -112,7 +112,8 @@ while True:
 
         if(loginsuccessFlag == 1):
             print("Login success!")
-            foodEstablishmentPage()
+            print("\n")
+            foodEstablishmentPage()                             # ? Testing purposes of Section 3. Section 2 should be called here instead. Please comment out
             # proceed to next view
         else:
             print("Error! Invalid username or password")

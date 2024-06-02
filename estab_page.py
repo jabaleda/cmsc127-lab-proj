@@ -229,6 +229,7 @@ def foodEstablishmentPage():
 
         if(choice == 0):
             print("Returning...")
+            mdbc.connection.close()
             break
 
         elif(choice == 1):
