@@ -1,8 +1,26 @@
 # main.py
 
 # * Import statements
-from estab_page import foodEstablishmentPage  # Import the necessary function from estab_page
+# import os
+# import mysql.connector as database
+
 import mdb_connector as mdbc
+import customerActions
+# from estab_page import foodEstablishmentPage  # Import the necessary function from estab_page
+
+
+# ? What's in this? contains the main execution of the program
+
+# connect to database
+# connection = database.connect(
+#     user="root",                                        # Uses root user
+#     password="poi",                                     # ! Change this to your password
+#     host="127.0.0.1",
+#     database="projectdb"                                # ! Change this to the name of project database you use
+# )
+
+# # instantiate cursor
+# cursor = connection.cursor()
 
 # functions --------
 # ? DB Functions
@@ -93,25 +111,23 @@ while True:
     userchoice = mainOuterMenu()
 
     if userchoice == 1:
-        # print login screen
+    # print login screen
         data = login()
-        # verify login details from database
+    # verify login details from database
         loginsuccessFlag = verifyLogin(data[0], data[1])
 
         if loginsuccessFlag == 1:
             print("Login success!")
-            username = data[0]
-            # Pass the username to foodEstablishmentPage
-            foodEstablishmentPage(1, username)  # Adjust as needed for testing
-            # proceed to next view
+            customerActions.userActionsLoop(data[0])
+        # proceed to next view
         else:
             print("Error! Invalid username or password")
         
     elif userchoice == 2:
-        # TODO: Add input validation
-        # print sign in screen
+    # To do: Add input validation
+    # print sign in screen
         signup_details = signup()
-        # add the user credentials to database
+    # add the user credentials to database
         signupsuccessFlag = addToUserTable(signup_details)
 
         if signupsuccessFlag == 1:
@@ -121,9 +137,12 @@ while True:
         
     elif userchoice == 0:
         print("Goodbye!")
-        mdbc.connection.close()
         break
 
     else:
-        # Catches other int inputs
+    # Catches other int inputs
         print("Invalid choice. Please try again.")
+
+    
+
+mdbc.connection.close()
