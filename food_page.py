@@ -13,10 +13,12 @@ def allFoodReviews(itemId):
     if len(foodReviews) > 0:
         for x in foodReviews:
             print("-------------------")
-            print(f"Username:     {x[3]}")
+            print("")
+            print(f"Username:   {x[3]}")
             print(f"Rating:     {x[0]}/5.0")
             print(f"Comment:    {x[1]}")
             print(f"Published:  {x[2]}")
+            print("")
 
         print("")
         print("[0] Back")
@@ -70,19 +72,18 @@ def focusedFoodItemPage(itemId, username):
 
     while True:
         print("\n")
-        print("--- FOOD ITEM: ---")
-        print(f"     {name}")
+        print("*****    FOOD ITEM:  *****")
+        print(f"----- {name} -----")
         choice = focusedFoodItemMenu()
 
         if choice == 0:
             break
         elif choice == 1:
             print("\n")
-            print(f"Reviews for {name}")
+            print(f"****** REVIEWS FOR {name} *****")
             allFoodReviews(itemId)
         elif choice == 2:
             print("\n")
-            #print(f"Reviews for {name}")
             recentFoodReviews(itemId)
         elif choice == 3:
             addFoodReview(itemId, username)
@@ -126,11 +127,14 @@ def recentFoodReviews(itemId):
 
     if len(reviews) > 0:
         for x in reviews:
+            print("")
             print("-------------------")
+            print("")
             print(f"Username:     {x[3]}")
             print(f"Rating:     {x[0]}/5.0")
             print(f"Comment:    {x[1]}")
             print(f"Published:  {x[2]}")
+            print("")
         
         print("")
         print("[0] Back")

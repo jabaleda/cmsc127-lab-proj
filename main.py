@@ -32,6 +32,7 @@ def login():
 
 def get_data(username):
     try:
+        mdbc.reconnect() 
         # ? Changed to access user table from locally created projectdb
         statement = "SELECT username, password FROM user WHERE username=%s"
         data = (username,)
@@ -121,12 +122,12 @@ while True:
         if(signupsuccessFlag == 1):
             print("Please log in to continue")
         else:
-            print("An error ocurred. Please try again")
+            print("Please try again")
 
         
     elif userchoice == 0:
         print("Goodbye!")
-        # connection.close()
+        mdbc.connection.close()
         break
 
 

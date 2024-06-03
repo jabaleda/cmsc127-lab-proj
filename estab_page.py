@@ -1,4 +1,3 @@
-# Import statements
 import mdb_connector as mdbc
 from food_page import *
 
@@ -14,8 +13,9 @@ def getAllFoodItems(estabId):
     items = list()
 
     try:
+        mdbc.reconnect()
         statement = "SELECT itemId, name, price, description FROM fooditem WHERE establishmentId=%s"
-        data = (estabId)
+        data = (estabId,)
         mdbc.cursor.execute(statement, data)
         for (itemId, name, price, description) in mdbc.cursor:
             item = (itemId, name, price, description)
@@ -28,8 +28,9 @@ def getAllFoodItems(estabId):
 def getAllEstabReviews(estabId):
     reviews = list()
     try:
+        mdbc.reconnect()
         statement = "SELECT rating, comment, date_reviewed, username FROM review WHERE establishmentId=%s"
-        data = (estabId)
+        data = (estabId,)
         mdbc.cursor.execute(statement, data)
         for (rating, comment, date_reviewed, username) in mdbc.cursor:
             review = (rating, comment, date_reviewed, username)
@@ -39,19 +40,63 @@ def getAllEstabReviews(estabId):
     
     return reviews
 
+def getAllFoodTypes():
+    types = list()
+    try:
+        statement = "SELECT foodtypeId, foodType FROM foodType"
+        mdbc.cursor.execute(statement)
+        for(foodtypeId, foodType) in mdbc.cursor:
+            type = tuple((foodtypeId, foodType))
+            types.append(type)
+    except mdbc.database.Error as e:
+        print(f"Error retrieving entry from database: {e}")
+    return types
+
+def filterFoodItemsbyType(estabId, typeId):
+    itemsInType = list()
+    try:
+        mdbc.reconnect()
+        statement = "SELECT DISTINCT fi.itemId, fi.name FROM fooditem fi JOIN fooditemtype fift ON fi.itemId = fift.itemId WHERE fi.establishmentId = %s AND fift.foodtypeId = %s"
+        data = (estabId, typeId)
+        mdbc.cursor.execute(statement, data)
+        for(itemId, name) in mdbc.cursor:
+            item = tuple((itemId, name))
+            itemsInType.append(item)
+    except mdbc.database.Error as e:
+        print(f"Error retrieving entry from database: {e}")
+
+    return itemsInType
+
+def getFoodTypeById(typeId):
+    try:
+        mdbc.reconnect()
+        statement = "SELECT foodType FROM foodtype WHERE foodtypeId = %s"
+        data = (typeId,)
+        mdbc.cursor.execute(statement, data)
+        result = mdbc.cursor.fetchone()
+        if result:
+            return result[0]
+        else:
+            print("Food type not found!")
+            return None
+    except mdbc.database.Error as e:
+        print(f"Error retrieving food type from database: {e}")
+        return None
+
 def sortFoodItemsbyPrice(estabId, sort):
     sortedItems = list()
     try:
-        statement = "SELECT itemId, name, price, description FROM fooditem WHERE establishmentId=%s ORDER BY price %s"
+        mdbc.reconnect()
         if sort.upper() == "ASC":
-            statement = statement % (estabId, "ASC")
+            statement = "SELECT itemId, name, price, description FROM fooditem WHERE establishmentId=%s ORDER BY price ASC"
         elif sort.upper() == "DESC":
-            statement = statement % (estabId, "DESC")
+            statement = "SELECT itemId, name, price, description FROM fooditem WHERE establishmentId=%s ORDER BY price DESC"
         else:
             print("Invalid sorting order specified.")
             return sortedItems
         
-        mdbc.cursor.execute(statement)
+        data = (estabId,)
+        mdbc.cursor.execute(statement, data)
         for (itemId, name, price, description) in mdbc.cursor:
             item = (itemId, name, price, description)
             sortedItems.append(item)
@@ -61,15 +106,17 @@ def sortFoodItemsbyPrice(estabId, sort):
     return sortedItems
 
 def allFoodItems(estabId):
+    mdbc.reconnect()
     foodItems = getAllFoodItems(estabId)
 
-    print("")
-    print("---------- FOOD ITEMS ----------")
+    print("\n")
+    print("***** FOOD ITEMS *****")
     print("")
 
     if len(foodItems) > 0:
         for i, x in enumerate(foodItems, start=1):
             print(f"[{i}] {x[1]}")
+        print("")
         print("[0] Back")
         print("")
 
@@ -89,6 +136,7 @@ def allFoodItems(estabId):
         return
 
 def allFoodItemsMenu(estabId, username):
+    mdbc.reconnect()
     while True:
         choice = allFoodItems(estabId)
 
@@ -99,11 +147,12 @@ def allFoodItemsMenu(estabId, username):
     return
 
 def allFoodItemsbyPrice(estabId, sort):
+    mdbc.reconnect()
     sortedFoodItems = sortFoodItemsbyPrice(estabId, sort)
 
     if len(sortedFoodItems) > 0:
         for i, x in enumerate(sortedFoodItems, start=1):
-            print(f"[{i}] {x[1]}")
+            print(f"[{i}] {x[1]} -  {x[2]}")
         
         print("[0] Back")
 
@@ -121,7 +170,72 @@ def allFoodItemsbyPrice(estabId, sort):
     else:
         print("No food items found!")
 
+def allFoodItemsbyType(estabId, typeId, username):
+    foodType = getFoodTypeById(typeId)
+    filteredItems = filterFoodItemsbyType(estabId, typeId)
+    print("\n")
+    print(f"***** FOOD ITEMS IN {foodType} *****")
+
+    if len(filteredItems) > 0:
+        # print all food items
+        i = 1
+        for x in filteredItems:
+            print(f"[{i}] {x[1]}")   # prints food name
+            i += 1
+        print("")
+        print("[0] Back")
+
+        while True:
+            choice = int(input("Select a food item: "))
+            if choice == 0:
+                break
+            elif choice < 0 or choice > len(filteredItems):
+                print("Invalid choice!")
+            else:
+                focusedFoodItemPage(filteredItems[choice - 1][0], username)
+                # Display the food items again after navigating back from the food item page
+                print(f"\n***** FOOD ITEMS IN {foodType} *****")
+                i = 1
+                for x in filteredItems:
+                    print(f"[{i}] {x[1]}")   # prints food name
+                    i += 1
+                print("")
+                print("[0] Back")
+    else:
+        print("No food items found!")
+        return
+
+def foodTypesMenu(estabId):
+    types = getAllFoodTypes()
+    print("")
+    i = 1
+    for x in types:
+        print(f"[{i}] {x[1]}")
+        i += 1
+    print("")
+    print("[0] Back")
+
+    while True:
+        choice = int(input("Select a type: "))
+        if choice == 0:
+            return choice
+        elif choice < 0 or choice > len(types):
+            print("Invalid choice!")
+        else:
+            return types[choice - 1][0]       # returns the foodtypeId
+
+def filterFoodItemsbyTypePage(estabId, username):
+    print("\n")
+    print("***** VIEW FOOD ITEMS BY TYPE *****")
+    while True:
+        choice = foodTypesMenu(estabId)
+        if choice == 0:
+            break
+        else:
+            allFoodItemsbyType(estabId, choice, username)
+
 def allFoodItemsbyPriceMenu(estabId, sort, username):
+    mdbc.reconnect()
     while True:
         choice = allFoodItemsbyPrice(estabId, sort)
 
@@ -133,12 +247,15 @@ def allFoodItemsbyPriceMenu(estabId, sort, username):
 
 def sortSelectFoodItemsbyPriceMenu():
     print("\n")
+    print("Sort Items by?")
+    print("")
     print("[1] Ascending")
     print("[2] Descending")
     print("[0] Back")
 
     while True:
         try:
+            mdbc.reconnect()
             page_choice = int(input("Select an action: "))
             if page_choice in [0, 1, 2]:
                 return page_choice
@@ -149,29 +266,41 @@ def sortSelectFoodItemsbyPriceMenu():
 
 def sortSelectFoodItemsbyPricePage(estabId, username):
     while True:
+        mdbc.reconnect()
         choice = sortSelectFoodItemsbyPriceMenu()
 
         if choice == 0:
             break
         elif choice == 1:
-            print("Food Items sorted by Price - Ascending")
+            print("\n")
+            print("***** Food Items sorted by Price - Ascending *****")
+            print("")
             allFoodItemsbyPriceMenu(estabId, "ASC", username)
         elif choice == 2:
-            print("Food Items sorted by Price - Descending")
+            print("\n")
+            print("***** Food Items sorted by Price - Descending *****")
+            print("")
             allFoodItemsbyPriceMenu(estabId, "DESC", username)
 
 def allEstabReviews(estabId):
+    mdbc.reconnect()
     estabReviews = getAllEstabReviews(estabId)
-
-    print("Reviews for <Estab Name>")
+    estab_details = getEstablishmentDetails(estabId)
+    if not estab_details:
+        return
+    
+    estab_name, estab_location = estab_details
+    print(f"***** REVIEWS FOR {estab_name} *****")
 
     if len(estabReviews) > 0:
         for x in estabReviews:
             print("-------------------")
-            print(f"Sender:     {x[3]}")
-            print(f"Rating:     {x[0]}")
-            print(f"{x[1]}")
+            print("")
+            print(f"Username:   {x[3]}")
+            print(f"Rating:     {x[0]}/5.0")
+            print(f"Comment:    {x[1]}")
             print(f"Published:  {x[2]}")
+            print("")
 
         print("[0] Back")
 
@@ -189,8 +318,9 @@ def allEstabReviews(estabId):
 
 def getEstablishmentDetails(establishmentId):
     try:
+        mdbc.reconnect()
         statement = "SELECT name, location FROM foodestablishment WHERE establishmentId = %s"
-        data = (establishmentId)
+        data = (establishmentId,)
         mdbc.cursor.execute(statement, data)
         result = mdbc.cursor.fetchone()
         if result:
@@ -221,6 +351,7 @@ def foodEstabMenu():
             print("Invalid input! Please enter a number.")
 
 def foodEstablishmentPage(estabId, username):
+    mdbc.reconnect()
     estab_details = getEstablishmentDetails(estabId)
     if not estab_details:
         return
@@ -228,28 +359,31 @@ def foodEstablishmentPage(estabId, username):
     estab_name, estab_location = estab_details
     while True:
         print("\n")
+        print("***** ESTABLISHMENT PAGE *****")
+        print("")
         print(f"    {estab_name} Details")
         print(f" Location: {estab_location}")
         choice = foodEstabMenu()
 
         if choice == 0:
             print("Returning...")
-            mdbc.connection.close()
             break
 
         elif choice == 1:
             allFoodItemsMenu(estabId, username)
 
         elif choice == 2:
-            pass
-
+            filterFoodItemsbyTypePage(estabId, username)
+            
         elif choice == 3:
             sortSelectFoodItemsbyPricePage(estabId, username)
 
         elif choice == 4:
+            print("\n")
             allEstabReviews(estabId)
 
         elif choice == 5:
+            print("\n")
             recentEstabReviews(estabId)
 
         elif choice == 6:
@@ -280,11 +414,15 @@ def recentEstabReviews(estabId):
 
     if len(reviews) > 0:
         for x in reviews:
+            print("")
             print("-------------------")
-            print(f"Sender:     {x[3]}")
-            print(f"Rating:     {x[0]}")
-            print(f"{x[1]}")
+            print("")
+            print(f"Username:     {x[3]}")
+            print(f"Rating:     {x[0]}/5.0")
+            print(f"Comment:    {x[1]}")
             print(f"Published:  {x[2]}")
+        
+        print("")
         print("[0] Back")
 
         while True:
@@ -321,4 +459,3 @@ def addEstabReview(estabId, username):
         print(f"Error adding review to database: {e}")
     except ValueError:
         print("Invalid input! Please enter the correct data types.")
-        

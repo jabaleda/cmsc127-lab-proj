@@ -13,3 +13,9 @@ connection = database.connect(
 )
 
 cursor = connection.cursor()
+
+def reconnect():
+    global connection, cursor
+    if not connection.is_connected():
+        connection.reconnect()
+        cursor = connection.cursor()
