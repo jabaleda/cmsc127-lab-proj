@@ -13,6 +13,171 @@ connection = database.connect(
 
 cursor = connection.cursor()
 
+
+def addFoodEstab():
+    try:
+        print("\n")
+        print("***** Add A Food Establishment *****")
+
+        print("\n")
+        print("Just a few things...")
+        # input establishment name
+        name = input("Enter your establishment name (max. 30 characters): ")
+        if len(name) > 30:
+            print("Invalid establishment name! Exceeded 30 characters.")
+            return
+        # input establishment location
+        location = input("Enter your establishment location (max. 30 characters): ")
+        if len(location) > 30:
+            print("Invalid establishment location! Exceeded 30 characters.")
+            return
+        
+        statement = "INSERT INTO foodestablishment (name, location) VALUES (%s, %s)"
+        data = (name, location)
+        cursor.execute(statement, data)
+        connection.commit()
+
+        print("Establishment added successfully!")
+    except database.Error as e:
+        print(f"Error retrieving entry from database: {e}")
+    except ValueError:
+        print("Invalid input! Please enter the correct data types.")
+
+
+def getEstabId(estabName):
+    try:
+        statement = "SELECT establishmentId FROM foodestablishment WHERE name=%s"
+        data = (estabName,)
+        cursor.execute(statement, data)
+        estabId = cursor.fetchone()
+        if estabId:
+            return estabId[0]
+        else:
+            print("Establishment not found!")
+            return None
+        
+    except database.Error as e:
+        print(f"Error retrieving entry from database: {e}")
+        return None
+
+
+def getFoodTypeId(foodTypeName):
+    try:
+        statement = "SELECT foodtypeId FROM foodtype WHERE foodType=%s"
+        data = (foodTypeName,)
+        cursor.execute(statement, data)
+        foodTypeId = cursor.fetchone()
+        if foodTypeId:
+            return foodTypeId[0]
+        else:
+            # print("Establishment not found!")
+            return None
+        
+    except database.Error as e:
+        print(f"Error retrieving entry from database: {e}")
+        return None
+    
+
+def addFoodType(foodTypeName):
+    try:
+        statement = "INSERT INTO foodtype (foodType) VALUES (%s)"
+        data = (foodTypeName,)
+        cursor.execute(statement, data)
+        connection.commit()
+        # print success
+    except database.Error as e:
+        print(f"Error adding entry to database: {e}")
+
+
+def addtoFoodItemTypeTable(itemId, itemName, foodTypeId, foodType):
+    try:
+        statement = "INSERT INTO fooditemtype (itemId, name, foodtypeId, foodType) VALUES (%s, %s,%s, %s)"
+        data = (itemId, itemName, foodTypeId, foodType,)
+        cursor.execute(statement, data)
+        connection.commit()
+        # print success
+    except database.Error as e:
+        print(f"Error adding entry to database: {e}")
+
+
+def tagFoodItemwithType(foodItemId, foodItemName):
+    while True:
+        # ask to enter a food type
+        foodType = input("Enter a food type for your new item: ")
+        # check if food type name exists in foodtype table
+        foodTypeId = getFoodTypeId(foodType)
+        # if it does not exist: add to foodtype table first
+        if not foodTypeId:
+            addFoodType(foodType)
+            # redefine foodTypeId
+            foodTypeId = getFoodTypeId(foodType)
+        
+        # then add to fooditemtypetable
+        addtoFoodItemTypeTable(foodItemId, foodItemName, foodTypeId, foodType)
+
+        # prompt if admin wants to add another type to item
+        print("\n")
+        print("Add another type for your item?")
+        print("[1] Yes")
+        print("[2] No")
+
+        choice = int(input("Select an action: "))
+
+        if choice == 2:
+            print("Finished adding food types. Returning...")
+            break
+    
+    return 1
+
+    
+
+def addFoodItem():
+    try:
+        print("\n")
+        print("***** Add A Food Item *****")
+
+        print("\n")
+        print("Just a few things...")
+
+        while True:
+            estabName = input("Input establishment name: ")
+            estabId = getEstabId(estabName)
+
+            if estabId:
+                # prompt for name
+                foodItemName = input("Enter food item name: ")
+                # prompt for price
+                foodItemPrice = input("Enter food item price: ")
+                # prompt for description
+                foodItemDesc = input("Enter food item description: ")
+
+                statement = "INSERT INTO fooditem (name, price, description, establishmentId) VALUES (%s, %s, %s, %s)"
+                data = (foodItemName, foodItemPrice, foodItemDesc, estabId)
+                cursor.execute(statement, data)
+                connection.commit()
+
+                # obtain id of newly inserted food item
+                statement2 = "SELECT itemId FROM fooditem WHERE name=%s"
+                data2 = (foodItemName,)
+                cursor.execute(statement2, data2)
+                newFoodItemId = cursor.fetchone()
+
+                # prompt for food types
+                doneFlag = tagFoodItemwithType(newFoodItemId[0], foodItemName)
+
+                # if function returned a value, exit
+                if doneFlag:
+                    break
+            
+            else:
+                print("Please try again.") 
+
+    except database.Error as e:
+        print(f"Error retrieving entry from database: {e}")
+
+
+
+
 def updateFoodEstab():
     try:
         print("/n")
@@ -161,6 +326,12 @@ def deleteFood():
 
     except database.Error as e:
         print(f"Error retrieving entry from database: {e}")
+
+
+
+
+
+
 
 # def adminActionsLoop()
 #     while True:
