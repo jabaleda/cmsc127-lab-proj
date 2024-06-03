@@ -39,7 +39,6 @@ def foodItemActions():
 
     return choice
 
-
 def userReviewActions():
     print("\n")
     print("Choose an Action:")
@@ -52,6 +51,7 @@ def userReviewActions():
 
     return choice
 
+# Check if the user owns the review
 def is_user_review(username, reviewId):
     try:
         mdbc.reconnect()
@@ -64,7 +64,7 @@ def is_user_review(username, reviewId):
         print(f"Error checking review ownership: {e}")
         return False
 
-
+# Retrieving Food establishment's Id
 def getFoodEstabId(name):
     print("\n")
     try:
@@ -83,14 +83,14 @@ def getFoodEstabId(name):
         print(f"Error retrieving entry from database: {e}")
         return 0
 
+# Search Food Establishment
 def searchFoodEstab(username):
     print("\n")
     try:
-        mdbc.reconnect()  # Ensure connection is active
+        mdbc.reconnect()  
         name = input("Which establishment do you want to view?: ")
         result = getFoodEstabId(name)
         if result != 0:
-            # Show establishment details
             statement = "SELECT * FROM foodestablishment WHERE establishmentId=%s"
             data = (result,)
             mdbc.cursor.execute(statement, data)
@@ -101,7 +101,6 @@ def searchFoodEstab(username):
                 print(f"Name: {name}")
                 print(f"Location: {location}")
 
-                # Ask the user if they want to view this establishment
                 choice = input("Do you want to view this establishment? (y/n): ")
                 if choice.lower() == 'y':
                     foodEstablishmentPage(result, username)
@@ -109,20 +108,20 @@ def searchFoodEstab(username):
                     return None
             else:
                 print("Establishment not found.")
-                return None  # Indicate that the establishment was not found
+                return None 
         else:
             print("No establishment found")
-            return None  # Indicate that the establishment was not found
+            return None  
 
     except mdbc.database.Error as e:
         print(f"Error retrieving entry from database: {e}")
 
-    # Return None if establishment ID is not found
     return None
 
+# View all establishments
 def viewAllFoodEstab():
     try:
-        mdbc.reconnect()  # Ensure connection is active
+        mdbc.reconnect() 
         print("\n")
         print("***** VIEW FOOD ESTABLISHMENTS ******")
         statement = "SELECT name, location from foodestablishment;"
@@ -130,7 +129,7 @@ def viewAllFoodEstab():
         establishments = mdbc.cursor.fetchall()
         if not establishments:
             print("No food establishments found.")
-            return None  # Indicate that no establishments were found
+            return None 
 
         for (name, location) in establishments:
             print(f"[{name}] -  {location}")
@@ -146,9 +145,10 @@ def viewAllFoodEstab():
     except mdbc.database.Error as e:
         print(f"Error retrieving entry from database: {e}")
 
+# View establishments sorted by highest rating
 def viewByHighRating():
     try:
-        mdbc.reconnect()  # Ensure connection is active
+        mdbc.reconnect()  
         print("\n")
         print("***** VIEW ESTABLISHMENTS BY HIGHEST RATING ******")
         statement = "SELECT name, AVG(rating) FROM foodestablishment fe JOIN review r on fe.establishmentId= r.establishmentId GROUP BY fe.establishmentId HAVING AVG(rating) >= 4 ORDER BY AVG(rating) DESC"
@@ -156,7 +156,7 @@ def viewByHighRating():
         establishments = mdbc.cursor.fetchall()
         if not establishments:
             print("No food establishments found with high ratings.")
-            return None  # Indicate that no establishments were found
+            return None  
 
         for (name, rating) in establishments:
             formatted_rating = "{:.1f}".format(rating)  # Format the rating to display with one decimal place
@@ -173,18 +173,15 @@ def viewByHighRating():
     except mdbc.database.Error as e:
         print(f"Error retrieving entry from database: {e}")
 
-
+# Search Food Item by Price Range
 def searchFoodByPriceRange(username):
     try:
         mdbc.reconnect()
         print("\n")
-        print("***** Search Food Items By Price Range ******")
-
-        # Change the input getting of low and high price range
+        print("***** SEARCH FOOD ITEM BY PRICE RANGE ******")
         priceRange = input("Enter price range (e.g., 10-50): ")
         lowRange, highRange = map(int, priceRange.split("-"))
 
-        # Execute search
         statement = "SELECT * FROM fooditem WHERE price BETWEEN %s AND %s"
         data = (lowRange, highRange)
         mdbc.cursor.execute(statement, data)
@@ -207,20 +204,19 @@ def searchFoodByPriceRange(username):
         if choice == '0':
             return
         else:
-            # Let the user pick a food item and redirect them to the food_page
+            # Redirect to the food_page
             focusedFoodItemPage(int(choice), username)
 
     except mdbc.database.Error as e:
         print(f"Error retrieving entry from database: {e}")
 
+# Search Food Item by Food Type
 def searchFoodByFoodType(username):
     try:
         mdbc.reconnect()
         print("\n")
-        print("***** Search Food Items By Food Type ******")
-
-        # Display options for foodtype
-        print("- FOOD TYPES -")
+        print("***** SEARCH FOOD ITEMS BY FOOD TYPE ******")
+        print("")
         statement = "SELECT * from foodtype"
         mdbc.cursor.execute(statement)
         food_types = {str(foodtypeId): foodType for foodtypeId, foodType in mdbc.cursor}
@@ -238,7 +234,6 @@ def searchFoodByFoodType(username):
             else:
                 print("Only choose in the food types above")
 
-        # Execute search
         statement = "SELECT * from fooditem WHERE itemid in (SELECT itemid from fooditemtype WHERE foodtypeId = %s)"
         data = (searchChoice,)
         mdbc.cursor.execute(statement, data)
@@ -261,17 +256,17 @@ def searchFoodByFoodType(username):
         if choice == '0':
             return
         else:
-            # Let the user pick a food item and redirect them to the food_page
+            # Redirect to the food_page
             focusedFoodItemPage(int(choice), username)
 
     except mdbc.database.Error as e:
         print(f"Error retrieving entry from database: {e}")
 
+# View all user's reviews
 def viewUserReviews(username):
     try:
         mdbc.reconnect()
         print("\n")
-        # Check if user has any reviews
         statement = "SELECT COUNT(*) FROM review WHERE username=%s"
         data = (username,)
         mdbc.cursor.execute(statement, data)
@@ -311,10 +306,10 @@ def viewUserReviews(username):
     except mdbc.database.Error as e:
         print(f"Error retrieving entry from database: {e}")
 
+# Updating user's review
 def updateReview(username):
     try:
         mdbc.reconnect()
-        # Display user's reviews
         viewUserReviews(username)
 
         print("")
@@ -356,11 +351,11 @@ def updateReview(username):
     except mdbc.database.Error as e:
         print(f"Error updating review: {e}")
 
+# Deleting user's review
 def deleteReview(username):
     try:
         mdbc.reconnect()
         print("\n")
-        # Display user's reviews
         viewUserReviews(username)
 
         print("\n")
@@ -383,6 +378,7 @@ def deleteReview(username):
     except mdbc.database.Error as e:
         print(f"Error deleting review: {e}")
    
+# User Menu
 def userActionsLoop(username):
     while True:
         userMenuChoice = userMenu()

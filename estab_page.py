@@ -1,3 +1,5 @@
+# Establishment Page
+
 import mdb_connector as mdbc
 from food_page import *
 
@@ -7,8 +9,24 @@ MONTHS = {
     "September": "09", "October": "10", "November": "11", "December": "12"
 }
 
-# 3. Food Establishment Page Group
-# * functions ----------
+# Getting Establishment's name and location
+def getEstablishmentDetails(establishmentId):
+    try:
+        mdbc.reconnect()
+        statement = "SELECT name, location FROM foodestablishment WHERE establishmentId = %s"
+        data = (establishmentId,)
+        mdbc.cursor.execute(statement, data)
+        result = mdbc.cursor.fetchone()
+        if result:
+            return result
+        else:
+            print("Establishment not found!")
+            return None
+    except mdbc.database.Error as e:
+        print(f"Error retrieving establishment details from database: {e}")
+        return None
+
+# Retrieving food items of an establishment
 def getAllFoodItems(estabId):
     items = list()
 
@@ -25,6 +43,7 @@ def getAllFoodItems(estabId):
 
     return items
 
+# Retrieving establishment reviews
 def getAllEstabReviews(estabId):
     reviews = list()
     try:
@@ -40,71 +59,7 @@ def getAllEstabReviews(estabId):
     
     return reviews
 
-def getAllFoodTypes():
-    types = list()
-    try:
-        statement = "SELECT foodtypeId, foodType FROM foodType"
-        mdbc.cursor.execute(statement)
-        for(foodtypeId, foodType) in mdbc.cursor:
-            type = tuple((foodtypeId, foodType))
-            types.append(type)
-    except mdbc.database.Error as e:
-        print(f"Error retrieving entry from database: {e}")
-    return types
-
-def filterFoodItemsbyType(estabId, typeId):
-    itemsInType = list()
-    try:
-        mdbc.reconnect()
-        statement = "SELECT DISTINCT fi.itemId, fi.name FROM fooditem fi JOIN fooditemtype fift ON fi.itemId = fift.itemId WHERE fi.establishmentId = %s AND fift.foodtypeId = %s"
-        data = (estabId, typeId)
-        mdbc.cursor.execute(statement, data)
-        for(itemId, name) in mdbc.cursor:
-            item = tuple((itemId, name))
-            itemsInType.append(item)
-    except mdbc.database.Error as e:
-        print(f"Error retrieving entry from database: {e}")
-
-    return itemsInType
-
-def getFoodTypeById(typeId):
-    try:
-        mdbc.reconnect()
-        statement = "SELECT foodType FROM foodtype WHERE foodtypeId = %s"
-        data = (typeId,)
-        mdbc.cursor.execute(statement, data)
-        result = mdbc.cursor.fetchone()
-        if result:
-            return result[0]
-        else:
-            print("Food type not found!")
-            return None
-    except mdbc.database.Error as e:
-        print(f"Error retrieving food type from database: {e}")
-        return None
-
-def sortFoodItemsbyPrice(estabId, sort):
-    sortedItems = list()
-    try:
-        mdbc.reconnect()
-        if sort.upper() == "ASC":
-            statement = "SELECT itemId, name, price, description FROM fooditem WHERE establishmentId=%s ORDER BY price ASC"
-        elif sort.upper() == "DESC":
-            statement = "SELECT itemId, name, price, description FROM fooditem WHERE establishmentId=%s ORDER BY price DESC"
-        else:
-            print("Invalid sorting order specified.")
-            return sortedItems
-        
-        data = (estabId,)
-        mdbc.cursor.execute(statement, data)
-        for (itemId, name, price, description) in mdbc.cursor:
-            item = (itemId, name, price, description)
-            sortedItems.append(item)
-    except mdbc.database.Error as e:
-        print(f"Error retrieving entry from database: {e}")
-
-    return sortedItems
-
+# Retrieving all food items of an establishment
 def allFoodItems(estabId):
     mdbc.reconnect()
     foodItems = getAllFoodItems(estabId)
@@ -134,6 +89,75 @@ def allFoodItems(estabId):
     else:
         print("No food items found!")
         return
+    
+# Retrieving all food types
+def getAllFoodTypes():
+    types = list()
+    try:
+        statement = "SELECT foodtypeId, foodType FROM foodType"
+        mdbc.cursor.execute(statement)
+        for(foodtypeId, foodType) in mdbc.cursor:
+            type = tuple((foodtypeId, foodType))
+            types.append(type)
+    except mdbc.database.Error as e:
+        print(f"Error retrieving entry from database: {e}")
+    return types
+
+# Filtering Food Items by its Food type
+def filterFoodItemsbyType(estabId, typeId):
+    itemsInType = list()
+    try:
+        mdbc.reconnect()
+        statement = "SELECT DISTINCT fi.itemId, fi.name FROM fooditem fi JOIN fooditemtype fift ON fi.itemId = fift.itemId WHERE fi.establishmentId = %s AND fift.foodtypeId = %s"
+        data = (estabId, typeId)
+        mdbc.cursor.execute(statement, data)
+        for(itemId, name) in mdbc.cursor:
+            item = tuple((itemId, name))
+            itemsInType.append(item)
+    except mdbc.database.Error as e:
+        print(f"Error retrieving entry from database: {e}")
+
+    return itemsInType
+
+# Retrieving the food type's Id
+def getFoodTypeById(typeId):
+    try:
+        mdbc.reconnect()
+        statement = "SELECT foodType FROM foodtype WHERE foodtypeId = %s"
+        data = (typeId,)
+        mdbc.cursor.execute(statement, data)
+        result = mdbc.cursor.fetchone()
+        if result:
+            return result[0]
+        else:
+            print("Food type not found!")
+            return None
+    except mdbc.database.Error as e:
+        print(f"Error retrieving food type from database: {e}")
+        return None
+
+# Sorting Food Items by its price
+def sortFoodItemsbyPrice(estabId, sort):
+    sortedItems = list()
+    try:
+        mdbc.reconnect()
+        if sort.upper() == "ASC":
+            statement = "SELECT itemId, name, price, description FROM fooditem WHERE establishmentId=%s ORDER BY price ASC"
+        elif sort.upper() == "DESC":
+            statement = "SELECT itemId, name, price, description FROM fooditem WHERE establishmentId=%s ORDER BY price DESC"
+        else:
+            print("Invalid sorting order specified.")
+            return sortedItems
+        
+        data = (estabId,)
+        mdbc.cursor.execute(statement, data)
+        for (itemId, name, price, description) in mdbc.cursor:
+            item = (itemId, name, price, description)
+            sortedItems.append(item)
+    except mdbc.database.Error as e:
+        print(f"Error retrieving entry from database: {e}")
+
+    return sortedItems
 
 def allFoodItemsMenu(estabId, username):
     mdbc.reconnect()
@@ -316,82 +340,7 @@ def allEstabReviews(estabId):
     else:
         print("No reviews found!")
 
-def getEstablishmentDetails(establishmentId):
-    try:
-        mdbc.reconnect()
-        statement = "SELECT name, location FROM foodestablishment WHERE establishmentId = %s"
-        data = (establishmentId,)
-        mdbc.cursor.execute(statement, data)
-        result = mdbc.cursor.fetchone()
-        if result:
-            return result
-        else:
-            print("Establishment not found!")
-            return None
-    except mdbc.database.Error as e:
-        print(f"Error retrieving establishment details from database: {e}")
-        return None
-
-def foodEstabMenu():
-    print("")
-    print(" [1] View all food items")
-    print(" [2] View food items by food type")
-    print(" [3] View food items sorted by price")
-    print(" [4] View all establishment reviews")
-    print(" [5] View recent establishment reviews")
-    print(" [6] Review this establishment")
-    print(" [0] Back")
-    print("")
-
-    while True:
-        try:
-            page_choice = int(input("Select an action: "))
-            return page_choice
-        except ValueError:
-            print("Invalid input! Please enter a number.")
-
-def foodEstablishmentPage(estabId, username):
-    mdbc.reconnect()
-    estab_details = getEstablishmentDetails(estabId)
-    if not estab_details:
-        return
-    
-    estab_name, estab_location = estab_details
-    while True:
-        print("\n")
-        print("***** ESTABLISHMENT PAGE *****")
-        print("")
-        print(f"    {estab_name} Details")
-        print(f" Location: {estab_location}")
-        choice = foodEstabMenu()
-
-        if choice == 0:
-            print("Returning...")
-            break
-
-        elif choice == 1:
-            allFoodItemsMenu(estabId, username)
-
-        elif choice == 2:
-            filterFoodItemsbyTypePage(estabId, username)
-            
-        elif choice == 3:
-            sortSelectFoodItemsbyPricePage(estabId, username)
-
-        elif choice == 4:
-            print("\n")
-            allEstabReviews(estabId)
-
-        elif choice == 5:
-            print("\n")
-            recentEstabReviews(estabId)
-
-        elif choice == 6:
-            addEstabReview(estabId, username)
-
-        else:
-            print("Invalid choice!")
-
+# 3e. View all reviews made within a month for an establishment
 def recentEstabReviews(estabId):
     month = input("Enter the month (e.g., January, February, etc.) to view reviews: ")
     month_num = MONTHS.get(month.capitalize())
@@ -437,6 +386,7 @@ def recentEstabReviews(estabId):
     else:
         print("No reviews found for the specified month!")
 
+# 3f. Add an establishment review
 def addEstabReview(estabId, username):
     try:
         rating = float(input("Enter rating (0.0 to 5.0): "))
@@ -459,3 +409,66 @@ def addEstabReview(estabId, username):
         print(f"Error adding review to database: {e}")
     except ValueError:
         print("Invalid input! Please enter the correct data types.")
+
+# Establishment Page Menu
+def foodEstabMenu():
+    print("")
+    print(" [1] View all food items")
+    print(" [2] View food items by food type")
+    print(" [3] View food items sorted by price")
+    print(" [4] View all establishment reviews")
+    print(" [5] View recent establishment reviews")
+    print(" [6] Review this establishment")
+    print(" [0] Back")
+    print("")
+
+    while True:
+        try:
+            page_choice = int(input("Select an action: "))
+            return page_choice
+        except ValueError:
+            print("Invalid input! Please enter a number.")
+
+# Establishment Page
+def foodEstablishmentPage(estabId, username):
+    mdbc.reconnect()
+    estab_details = getEstablishmentDetails(estabId)
+    if not estab_details:
+        return
+    
+    estab_name, estab_location = estab_details
+    while True:
+        print("\n")
+        print("***** ESTABLISHMENT PAGE *****")
+        print("")
+        print(f"    {estab_name} Details")
+        print(f" Location: {estab_location}")
+        choice = foodEstabMenu()
+
+        if choice == 0:
+            print("Returning...")
+            break
+
+        elif choice == 1:
+            allFoodItemsMenu(estabId, username)
+
+        elif choice == 2:
+            filterFoodItemsbyTypePage(estabId, username)
+            
+        elif choice == 3:
+            sortSelectFoodItemsbyPricePage(estabId, username)
+
+        elif choice == 4:
+            print("\n")
+            allEstabReviews(estabId)
+
+        elif choice == 5:
+            print("\n")
+            recentEstabReviews(estabId)
+
+        elif choice == 6:
+            addEstabReview(estabId, username)
+
+        else:
+            print("Invalid choice!")
+

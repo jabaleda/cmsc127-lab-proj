@@ -1,12 +1,14 @@
+# * 4. Specific Food Item functions
+
 import mdb_connector as mdbc
 
-# * 4. Specific Food Item functions ----------
 MONTHS = {
     "January": "01", "February": "02", "March": "03", "April": "04",
     "May": "05", "June": "06", "July": "07", "August": "08",
     "September": "09", "October": "10", "November": "11", "December": "12"
 }
 
+# retrieving all food reviews
 def allFoodReviews(itemId):
     foodReviews = getAllFoodReviews(itemId)
 
@@ -50,6 +52,7 @@ def getAllFoodReviews(itemId):
     
     return reviews
 
+# Retrieving Food item's name
 def getFoodItemName(itemId):
     try:
         statement = "SELECT name FROM fooditem WHERE itemId = %s"
@@ -64,47 +67,8 @@ def getFoodItemName(itemId):
     except mdbc.database.Error as e:
         print(f"Error retrieving food item name from database: {e}")
         return None
-
-def focusedFoodItemPage(itemId, username):
-    name = getFoodItemName(itemId)
-    if not name:
-        return
-
-    while True:
-        print("\n")
-        print("*****    FOOD ITEM:  *****")
-        print(f"----- {name} -----")
-        choice = focusedFoodItemMenu()
-
-        if choice == 0:
-            break
-        elif choice == 1:
-            print("\n")
-            print(f"****** REVIEWS FOR {name} *****")
-            allFoodReviews(itemId)
-        elif choice == 2:
-            print("\n")
-            recentFoodReviews(itemId)
-        elif choice == 3:
-            addFoodReview(itemId, username)
-        else:
-            print("Invalid choice!")
-
-def focusedFoodItemMenu():
-    print("")
-    print("[1] View all reviews")
-    print("[2] View reviews in a specific month")
-    print("[3] Review this food item")
-    print("[0] Back")
-    print("")
-
-    while True:
-        try:
-            page_choice = int(input("Select an action: "))
-            return page_choice
-        except ValueError:
-            print("Invalid input! Please enter a number.")
-
+    
+# View all reviews made within a month for a food item
 def recentFoodReviews(itemId):
     month = input("Enter the month (e.g., January, February, etc.) to view reviews: ")
     month_num = MONTHS.get(month.capitalize())
@@ -151,6 +115,7 @@ def recentFoodReviews(itemId):
     else:
         print("No reviews found for the specified month!")
 
+# Add Food review
 def addFoodReview(itemId, username):
 
     print("\n")
@@ -176,3 +141,44 @@ def addFoodReview(itemId, username):
         print(f"Error adding review to database: {e}")
     except ValueError:
         print("Invalid input! Please enter the correct data types.")
+
+# Food Page 
+def focusedFoodItemPage(itemId, username):
+    name = getFoodItemName(itemId)
+    if not name:
+        return
+
+    while True:
+        print("\n")
+        print("*****    FOOD ITEM:  *****")
+        print(f"----- {name} -----")
+        choice = focusedFoodItemMenu()
+
+        if choice == 0:
+            break
+        elif choice == 1:
+            print("\n")
+            print(f"****** REVIEWS FOR {name} *****")
+            allFoodReviews(itemId)
+        elif choice == 2:
+            print("\n")
+            recentFoodReviews(itemId)
+        elif choice == 3:
+            addFoodReview(itemId, username)
+        else:
+            print("Invalid choice!")
+
+def focusedFoodItemMenu():
+    print("")
+    print("[1] View all reviews")
+    print("[2] View reviews in a specific month")
+    print("[3] Review this food item")
+    print("[0] Back")
+    print("")
+
+    while True:
+        try:
+            page_choice = int(input("Select an action: "))
+            return page_choice
+        except ValueError:
+            print("Invalid input! Please enter a number.")
