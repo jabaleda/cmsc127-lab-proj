@@ -329,60 +329,82 @@ def deleteFood():
 
 
 
+def adminMenu():
+    print("\n")
+    print("Choose an action")
+    print("[1] View all establishments")
+    print("[2] View all food items")
+    print("[0] Logout")
+
+    choice = int(input("I want to... "))
+
+    return choice
 
 
+def adminEstabMenu():
+    print("\n")
+    print("Choose an action")
+    print("[1] Add an establishment")
+    print("[2] Update an establishment")
+    print("[3] Delete an establishment")
+    print("[0] Back")
+
+    choice = int(input("I want to... "))
+
+    return choice
+
+def adminFoodMenu():
+    print("\n")
+    print("Choose an action")
+    print("[1] Add a food item")
+    print("[2] Update a food item")
+    print("[3] Delete a food item")
+    print("[0] Back")
+
+    choice = int(input("I want to... "))
+
+    return choice
 
 
-# def adminActionsLoop()
-#     while True:
-#         adminMenuChoice = userMenu()
+def adminActionsLoop():
+    while True:
+        adminMenuChoice = adminMenu()
 
-#         if adminMenuChoice == 1:
-#             estabChoice = foodEstabActions()
-#             while True:
-#                 if estabChoice == 1:
-#                     #result =
-#                     searchFoodEstab() #returns foodEstabId to be used to redirect to food estab page
-#                 elif estabChoice == 2:
-#                     #result =
-#                     viewAllFoodEstab() #returns foodEstabId to be used to redirect to food estab page
-#                 elif estabChoice == 3:
-#                     #result =
-#                     viewByHighRating() #returns foodEstabId to be used to redirect to food estab page
-#                 elif estabChoice == 0:
-#                     break
-#                 else:
-#                     print("Option does not exist. Please try again!")
-#         elif adminMenuChoice == 2:
-#             while True:
-#                 foodChoice = foodItemActions()
+        if adminMenuChoice == 1:
+            # print all food establishments here -> call view all estab
+            while True:
 
-#                 if foodChoice == 1:
-#                     #result =
-#                     searchFoodByPriceRange()
-#                 elif foodChoice == 2:
-#                     #result =
-#                     searchFoodByFoodType()
-#                 elif foodChoice == 0:
-#                     break
-#                 else:
-#                     print("Option does not exist. Please try again!")
-#         elif adminMenuChoice == 3:
-#             while True:
-#                 reviewChoice = userReviewActions()
+                estabMenuChoice = adminEstabMenu()
 
-#                 if reviewChoice == 1:
-#                     viewUserReviews(username)
-#                 elif reviewChoice == 2:
-#                     updateReview()
-#                 elif reviewChoice == 3:
-#                     deleteReview()
-#                 elif reviewChoice == 0:
-#                     break
-#                 else:
-#                     print("Option does not exist. Please try again!")
-#         elif adminMenuChoice == 0:
-#             break
-#         else:
-#             print("Option does not exist. Please try again!")
+                if estabMenuChoice == 1:
+                    addFoodEstab()
+                elif estabMenuChoice == 2:
+                    updateFoodEstab()
+                elif estabMenuChoice == 3:
+                    deleteFoodEstab()
+                elif estabMenuChoice == 0:
+                    break
+                else:
+                    print("Option does not exist. Please try again!")
+
+        elif adminMenuChoice == 2:
+            # print all food items here -> call view all food
+            while True:
+                foodMenuChoice = adminFoodMenu()
+
+                if foodMenuChoice == 1:
+                    addFoodItem()
+                elif foodMenuChoice == 2:
+                    updateFoodItem()
+                elif foodMenuChoice == 3:
+                    deleteFood
+                elif foodMenuChoice == 0:
+                    break
+                else:
+                    print("Option does not exist. Please try again!")
+
+        elif adminMenuChoice == 0:
+            break
+        else:
+            print("Option does not exist. Please try again!")
         
