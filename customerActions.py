@@ -123,6 +123,24 @@ def viewByHighRating():
         print(f"Error retrieving entry from database: {e}")
 
 
+def getFoodItemId(name):
+        print("\n")
+        try:
+            statement = "SELECT itemId from fooditem WHERE name=%s"
+            data = (name,)
+            cursor.execute(statement, data)
+            for(itemId) in cursor:
+                # print(f"{establishmentId} - {name} - {location}")
+                return itemId
+                # loop = 0
+                #successful
+            print(name + " not found!")
+            return 0
+
+        except database.Error as e:
+            print(f"Error retrieving entry from database: {e}")
+
+
 def searchFoodByPriceRange():
     try:
         print("\n")
@@ -138,6 +156,10 @@ def searchFoodByPriceRange():
         cursor.execute(statement, data)
         for(itemId, name, price, description, establishmentId) in cursor:
             print(f"[{itemId}] {name} - {price} - {description} - {establishmentId}")
+        choice = input("Which food item do you want to view?: ")
+        result = getFoodItemId(choice)
+        if result != 0:
+            return result #returns itemId to be used to redirect to food item page
     except database.Error as e:
         print(f"Error retrieving entry from database: {e}")
 
@@ -164,6 +186,11 @@ def searchFoodByFoodType():
         for(itemId, name, price, description, establishmentId) in cursor:
             print(f"[{itemId}] {name} - {price} - {description} - {establishmentId}")
 
+        choice = input("Which food item do you want to view?: ")
+        result = getFoodItemId(choice)
+        if result != 0:
+            return result
+
     except database.Error as e:
         print(f"Error retrieving entry from database: {e}")
 
@@ -178,7 +205,7 @@ def viewUserReviews(username):
         data = (username,)
         cursor.execute(statement, data)
         for(reviewId, rating, comment, date_reviewed, itemId) in cursor:
-            print(f"[{reviewId}] {rating} - {comment} - {date_reviewed} - {establishmentId}")
+            print(f"[{reviewId}] {rating} - {comment} - {date_reviewed} - {itemId}")
 
         #Prints user's establishment reviews
         print("-- Food Establsihment Reviews --")
@@ -217,7 +244,7 @@ def updateReview():
                 data = (updComment, updId)
                 cursor.execute(statement, data)
             elif updChoice == 0:
-                confirm = input("Are you sure you want to delete review [y/n]? ")
+                confirm = input("Are you sure you want to update review [y/n]? ")
                 if confirm == 'y':
                     connection.commit()
                     print("Successfully updated!")
@@ -262,17 +289,17 @@ def userActionsLoop(username):
         userMenuChoice = userMenu()
 
         if userMenuChoice == 1:
-            result = foodEstabActions()
+            estabChoice = foodEstabActions()
             while True:
                 if estabChoice == 1:
                     #result =
-                    print(searchFoodEstab())
+                    searchFoodEstab() #returns foodEstabId to be used to redirect to food estab page
                 elif estabChoice == 2:
                     #result =
-                    print(viewAllFoodEstab())
+                    viewAllFoodEstab() #returns foodEstabId to be used to redirect to food estab page
                 elif estabChoice == 3:
                     #result =
-                    print(viewByHighRating())
+                    viewByHighRating() #returns foodEstabId to be used to redirect to food estab page
                 elif estabChoice == 0:
                     break
                 else:
@@ -285,6 +312,7 @@ def userActionsLoop(username):
                     #result =
                     searchFoodByPriceRange()
                 elif foodChoice == 2:
+                    #result =
                     searchFoodByFoodType()
                 elif foodChoice == 0:
                     break
@@ -297,10 +325,8 @@ def userActionsLoop(username):
                 if reviewChoice == 1:
                     viewUserReviews(username)
                 elif reviewChoice == 2:
-                    #update
                     updateReview()
                 elif reviewChoice == 3:
-                    #delete
                     deleteReview()
                 elif reviewChoice == 0:
                     break
