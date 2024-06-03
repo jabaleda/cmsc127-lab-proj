@@ -393,6 +393,9 @@ def deleteReview(username):
 # User Menu
 def userActionsLoop(username):
     while True:
+        print("\n")
+        print("Savor the Flavor of Taylor's Favorites!")
+        print("")
         userMenuChoice = userMenu()
 
         if userMenuChoice == 1:

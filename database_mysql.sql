@@ -14,6 +14,14 @@ CREATE TABLE user (
   PRIMARY KEY (username)
 );
 
+CREATE TABLE adminUser (
+  adminId INT AUTO_INCREMENT PRIMARY KEY,
+  username VARCHAR(17) NOT NULL,
+  email VARCHAR(30) NOT NULL,
+
+  CONSTRAINT adminUser_username_fk FOREIGN KEY (username) REFERENCES user(username)
+);
+
 CREATE TABLE foodestablishment (
   establishmentId int(11) NOT NULL AUTO_INCREMENT,
   name varchar(30) NOT NULL,
@@ -63,18 +71,23 @@ CREATE TABLE review (
 
 -- insert in user table
 INSERT INTO user VALUES
-("chanp", "Chan", "chanp@gmail.com", "passw0rd"),
+("tswift", "Taylor Swift", "taylor@example.com", "adminpass"),
 ('john_doe', 'John Doe', 'john@example.com', 'password_1'),
 ('jane_smith', 'Jane Smith', 'jane@example.com', 'password_2'),
 ('bob_jones', 'Bob Jones', 'bob@example.com', 'password_3');
 
---insert in foodestablishment
+-- insert the admin user into the admin table
+INSERT INTO adminUser (username, email)
+SELECT username, email
+FROM user
+WHERE username = 'tswift';
 
+--insert in foodestablishment
 INSERT INTO foodestablishment (name, location) VALUES
-('Jollibee', 'Lopez Avenue'),
-('Chowking', 'Vega'),
-('Cynthia', 'Umali'),
-('Mr.Grill', 'Laguna');
+('Taylor Cafe', 'Nashville'),
+('Swift Diner', 'New York'),
+('1989 Bakery', 'Los Angeles'),
+('Folklore Grill', 'Pennsylvania');
 
 --insert in foodtype
 INSERT INTO foodtype (foodType) VALUES
@@ -87,44 +100,45 @@ INSERT INTO foodtype (foodType) VALUES
 
 --insert in fooditem
 INSERT INTO fooditem (name, price, description, establishmentId) VALUES
-('Pizza Margherita', 199.00, 'Classic pizza', 4),
-('Cheeseburger', 50.00, 'Burger with cheese', 1),
-('Sushi Roll', 70.00, 'Fresh salmon', 4),
-('Caesar Salad', 110.00, 'With Caesar dressing', 2),
-('Spaghetti Carbonara', 80.00, 'Pasta with creamy sauce', 1),
-('Tacos', 60.00, 'Corn tortillas with beef', 3),
-('Ice Cream Sundae', 20.00, 'Vanilla ice cream', 1),
-('French Fries', 40.00, 'Crispy golden fries', 1),
-('Chicken Wings', 100.00, 'Spicy fried chicken wings', 4);
+('Red Velvet Cake', 150.00, 'Rich red velvet cake', 3),
+('Love Story Latte', 120.00, 'Creamy latte with love', 1),
+('Shake It Off Smoothie', 100.00, 'Refreshing fruit smoothie', 4),
+('Willow Sandwich', 80.00, 'Delicious turkey sandwich', 2),
+('Evermore Espresso', 90.00, 'Strong and bold espresso', 1),
+('Fearless Fries', 50.00, 'Crispy golden fries', 3),
+('Blank Space Burger', 110.00, 'Juicy cheeseburger', 2),
+('Wildest Dreams Pizza', 200.00, 'Pizza with all toppings', 4),
+('Delicate Donuts', 60.00, 'Soft and sweet donuts', 1);
 
 -- insert in fooditemtype table
 INSERT INTO fooditemtype (itemId, name, foodtypeId, foodType) VALUES
-(1, 'Pizza Margherita', 1, 'Meat'),    
-(1, 'Pizza Margherita', 2, 'Vegetable'),  
-(2, 'Cheeseburger', 1, 'Meat'),        
-(3, 'Sushi Roll', 3, 'Seafood'),       
-(4, 'Caesar Salad', 2, 'Vegetable'),   
-(5, 'Spaghetti Carbonara', 6, 'Pasta'),    
-(6, 'Tacos', 1, 'Meat'),               
-(7, 'Ice Cream Sundae', 5, 'Dessert'),   
-(8, 'French Fries', 6, 'Snack'),       
-(9, 'Chicken Wings', 1, 'Meat');       
+(1, 'Red Velvet Cake', 5, 'Dessert'),    
+(2, 'Love Story Latte', 5, 'Dessert'),  
+(3, 'Shake It Off Smoothie', 4, 'Fruit'),        
+(4, 'Willow Sandwich', 1, 'Meat'),       
+(4, 'Willow Sandwich', 2, 'Vegetable'),   
+(5, 'Evermore Espresso', 5, 'Dessert'),    
+(6, 'Fearless Fries', 6, 'Snack'),               
+(7, 'Blank Space Burger', 1, 'Meat'),   
+(8, 'Wildest Dreams Pizza', 1, 'Meat'),       
+(8, 'Wildest Dreams Pizza', 2, 'Vegetable'),
+(9, 'Delicate Donuts', 5, 'Dessert');
 
 -- Food reviews
 INSERT INTO review (rating, comment, username, itemId) VALUES
-(4.5, 'Great pizza!', 'john_doe', 1),  
-(4.0, 'Delicious cheeseburger!', 'jane_smith', 2),  
-(4.2, 'Amazing sushi!', 'bob_jones', 3),  
-(4.3, 'Fresh salad!', 'john_doe', 4),  
-(4.6, 'Perfect pasta!', 'jane_smith', 5),  
-(4.4, 'Tasty tacos!', 'bob_jones', 6),  
-(4.8, 'Yummy ice cream!', 'john_doe', 7),  
-(4.7, 'Crunchy fries!', 'jane_smith', 8),  
-(4.9, 'Spicy wings!', 'bob_jones', 9);  
+(4.5, 'Amazing cake!', 'john_doe', 1),  
+(4.0, 'Delicious latte!', 'jane_smith', 2),  
+(4.2, 'Refreshing smoothie!', 'bob_jones', 3),  
+(4.3, 'Great sandwich!', 'john_doe', 4),  
+(4.6, 'Perfect espresso!', 'jane_smith', 5),  
+(4.4, 'Tasty fries!', 'bob_jones', 6),  
+(4.8, 'Juicy burger!', 'john_doe', 7),  
+(4.7, 'Delicious pizza!', 'jane_smith', 8),  
+(4.9, 'Soft and sweet donuts!', 'bob_jones', 9);
 
 -- Establishment reviews
 INSERT INTO review (rating, comment, username, establishmentId) VALUES
-(4.5, 'Great service!', 'john_doe', 1),  
-(4.0, 'Delicious food!', 'jane_smith', 2), 
-(4.2, 'Lovely ambiance!', 'bob_jones', 3), 
-(4.3, 'Excellent grilled dishes!', 'john_doe', 4);  
+(4.5, 'Amazing cafe!', 'john_doe', 1),  
+(4.0, 'Lovely diner!', 'jane_smith', 2), 
+(4.2, 'Great bakery!', 'bob_jones', 3), 
+(4.3, 'Excellent grill!', 'john_doe', 4);
