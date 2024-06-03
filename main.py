@@ -1,20 +1,8 @@
 
 # * Import statements
-import os
-import mysql.connector as database
 
-# ? What's in this? contains the main execution of the program
-
-connect to database
-connection = database.connect(
-    user="root",                                        # Uses root user
-    password="poi",                                     # ! Change this to your password
-    host="127.0.0.1",
-    database="projectdb"                                # ! Change this to the name of project database you use
-)
-
-# instantiate cursor
-cursor = connection.cursor()
+import mdb_connector as mdbc
+from customerActions import userActionsLoop
 
 # functions --------
 def mainOuterMenu():
@@ -24,9 +12,12 @@ def mainOuterMenu():
     print("[2] Sign Up")
     print("[0] Exit")
 
-    choice = int(input("I want to... "))
-
-    return choice
+    while True:
+        try:
+            choice = int(input("I want to... "))
+            return choice
+        except ValueError:
+            print("Invalid input! Please enter a number.")
 
 # --- Login functions ---
 def login():
@@ -41,18 +32,19 @@ def login():
 
 def get_data(username):
     try:
+        mdbc.reconnect() 
         # ? Changed to access user table from locally created projectdb
         statement = "SELECT username, password FROM user WHERE username=%s"
         data = (username,)
-        cursor.execute(statement, data)
-        for(username, password) in cursor:
+        mdbc.cursor.execute(statement, data)
+        for(username, password) in mdbc.cursor:
             # print(f"Successfully retrieved {ename}, {job}")
-            print("Successfully retrieved!")
+            # print("Successfully retrieved!")
             # return found info
             return username, password
         # return not found
         return 0 
-    except database.Error as e:
+    except mdbc.database.Error as e:
         print(f"Error retrieving entry from database: {e}")
 
 
@@ -93,57 +85,55 @@ def addToUserTable(signup_tuple):
     try:
         statement = "INSERT INTO user (username, name, email, password) VALUES (%s, %s, %s, %s)"
         data = (username, name, email, password)
-        cursor.execute(statement, data)
-        connection.commit()
+        mdbc.cursor.execute(statement, data)
+        mdbc.connection.commit()
         print("Successfully signed you up!")
         return 1
-    except database.Error as e:
+    except mdbc.database.Error as e:
         print(f"Error signing up: {e}")
         return 0
 
+# * Main Loop
+while True:
+    userchoice = mainOuterMenu()
 
+    if userchoice == 1:
+    # print login screen
+        data = login()
+    # verify login details from database
+        loginsuccessFlag = verifyLogin(data[0], data[1])
 
-
-
-* Main Loop
-    while True:
-        userchoice = mainOuterMenu()
-
-        if userchoice == 1:
-        # print login screen
-            data = login()
-        # verify login details from database
-            loginsuccessFlag = verifyLogin(data[0], data[1])
-
-            if(loginsuccessFlag == 1):
-                print("Login success!")
-            # proceed to next view
-            else:
-                print("Error! Invalid username or password")
-        
-        
-        elif userchoice == 2:
-            # TODO: Add input validation
-        # print sign in screen
-            signup_details = signup()
-        # add the user credentials to database
-            signupsuccessFlag = addToUserTable(signup_details)
-
-            if(signupsuccessFlag == 1):
-                print("Please log in to continue")
-            else:
-                print("An error ocurred. Please try again")
-
-        
-        elif userchoice == 0:
-            print("Goodbye!")
-            connection.close()
-            break
-
-
+        if(loginsuccessFlag == 1):
+            print("Login success!")
+            username = data[0]
+            userActionsLoop(username)
+        # proceed to next view
         else:
-        # Catches other int inputs
-            print("Invalid choice. Please try again.")
+            print("Error! Invalid username or password")
+        
+        
+    elif userchoice == 2:
+    # To do: Add input validation
+    # print sign in screen
+        signup_details = signup()
+    # add the user credentials to database
+        signupsuccessFlag = addToUserTable(signup_details)
+
+        if(signupsuccessFlag == 1):
+            print("Please log in to continue")
+        else:
+            print("Please try again")
+
+        
+    elif userchoice == 0:
+        print("Goodbye!")
+        mdbc.connection.close()
+        break
 
 
-connection.close()
+    else:
+    # Catches other int inputs
+        print("Invalid choice. Please try again.")
+
+
+mdbc.connection.close()
