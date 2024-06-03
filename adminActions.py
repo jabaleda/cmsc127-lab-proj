@@ -328,6 +328,17 @@ def deleteFood():
         print(f"Error retrieving entry from database: {e}")
 
 
+def adminViewAllFoodEstab():
+    try:
+        print("***** View Food Establishments ******")
+        statement = "SELECT * from foodestablishment;"
+        cursor.execute(statement)
+        for(establishmentId, name, location) in cursor:
+            print(f"[{establishmentId}] {name} - {location}")
+
+    except database.Error as e:
+        print(f"Error retrieving entry from database: {e}")
+
 
 def adminMenu():
     print("\n")
@@ -372,6 +383,7 @@ def adminActionsLoop():
 
         if adminMenuChoice == 1:
             # print all food establishments here -> call view all estab
+            adminViewAllFoodEstab()
             while True:
 
                 estabMenuChoice = adminEstabMenu()
