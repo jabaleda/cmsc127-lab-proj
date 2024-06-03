@@ -182,7 +182,7 @@ def searchFoodByPriceRange(username):
         priceRange = input("Enter price range (e.g., 10-50): ")
         lowRange, highRange = map(int, priceRange.split("-"))
 
-        statement = "SELECT * FROM fooditem WHERE price BETWEEN %s AND %s"
+        statement = "SELECT itemId, name, price, description FROM fooditem WHERE price BETWEEN %s AND %s"
         data = (lowRange, highRange)
         mdbc.cursor.execute(statement, data)
         result = mdbc.cursor.fetchall()
@@ -190,8 +190,8 @@ def searchFoodByPriceRange(username):
             print("No food item in that price range")
             return
 
-        for (itemId, name, price, description, establishmentId) in result:
-            print(f"[{itemId}] {name} - {price} - {description} - {establishmentId}")
+        for (itemId, name, price, description) in result:
+            print(f"[{itemId}] {name} - {price} - {description}")
 
         print("\n")
         print("[0] Go back")
@@ -234,7 +234,7 @@ def searchFoodByFoodType(username):
             else:
                 print("Only choose in the food types above")
 
-        statement = "SELECT * from fooditem WHERE itemid in (SELECT itemid from fooditemtype WHERE foodtypeId = %s)"
+        statement = "SELECT itemId, name, price, description from fooditem WHERE itemid in (SELECT itemid from fooditemtype WHERE foodtypeId = %s)"
         data = (searchChoice,)
         mdbc.cursor.execute(statement, data)
         result = mdbc.cursor.fetchall()
@@ -242,14 +242,14 @@ def searchFoodByFoodType(username):
             print("No food item of that type found")
             return
 
-        for (itemId, name, price, description, establishmentId) in result:
-            print(f"[{itemId}] {name} - {price} - {description} - {establishmentId}")
+        for (itemId, name, price, description) in result:
+            print(f"[{itemId}] {name} - {price} - {description}")
 
         print("\n")
         print("[0] Go back")
         choice = input("Input food Id to view food item: ")
 
-        while choice != 'b' and not any(int(choice) == item[0] for item in result):
+        while choice != '0' and not any(int(choice) == item[0] for item in result):
             print("Invalid option! Please select a valid food item or '0' to go back.")
             choice = input("Input food Id to view food item: ")
 
@@ -311,7 +311,13 @@ def updateReview(username):
     try:
         mdbc.reconnect()
         viewUserReviews(username)
-
+        statement = "SELECT COUNT(*) FROM review WHERE username=%s"
+        data = (username,)
+        mdbc.cursor.execute(statement, data)
+        result = mdbc.cursor.fetchone()
+        if result[0] == 0:
+            return
+        
         print("")
         updId = input("Input review ID to update: ")
         if not is_user_review(username, updId):
@@ -357,7 +363,13 @@ def deleteReview(username):
         mdbc.reconnect()
         print("\n")
         viewUserReviews(username)
-
+        statement = "SELECT COUNT(*) FROM review WHERE username=%s"
+        data = (username,)
+        mdbc.cursor.execute(statement, data)
+        result = mdbc.cursor.fetchone()
+        if result[0] == 0:
+            return
+        
         print("\n")
         print("***** Delete A Review *****")
 
